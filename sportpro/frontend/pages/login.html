@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — SportPro</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .login-logo {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .login-logo span { color: var(--brand); }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+    }
+
+    .login-title { font-size: 1.6rem; margin-bottom: 0.25rem; }
+    .login-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+    /* Seletor de tipo: Atleta / Treinador */
+    .type-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .type-btn {
+      padding: 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+    }
+    .type-btn.active {
+      border-color: var(--brand);
+      color: var(--brand);
+      background: rgba(200,255,0,0.07);
+    }
+
+    .form-stack { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .login-footer {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+    .login-footer a { color: var(--brand); font-weight: 600; }
+
+    .alert-container { margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrapper">
+    <div class="login-logo">Sport<span>Pro</span></div>
+
+    <div class="login-card">
+      <h2 class="login-title">Bem-vindo de volta</h2>
+      <p class="login-sub">Entre na sua conta para continuar</p>
+
+      <!-- Seletor de tipo de usuário -->
+      <div class="type-selector">
+        <button class="type-btn active" data-type="ATLETA" onclick="setTipo('ATLETA', this)">
+          🤸 Atleta
+        </button>
+        <button class="type-btn" data-type="TREINADOR" onclick="setTipo('TREINADOR', this)">
+          🏋️ Treinador
+        </button>
+      </div>
+
+      <div class="alert-container"></div>
+
+      <form class="form-stack" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="email" class="form-control" placeholder="seu@email.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" id="senha" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="btn-login">
+          Entrar
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <p>Atleta? <a href="cadastro-atleta.html">Criar conta de atleta</a></p>
+        <p style="margin-top:0.5rem;">Treinador? <a href="cadastro-treinador.html">Criar conta de treinador</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script>
+    let tipoSelecionado = 'ATLETA';
+
+    function setTipo(tipo, btn) {
+      tipoSelecionado = tipo;
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-login');
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+
+      UI.setLoading(btn, true);
+
+      try {
+        const result = await Auth.login(email, senha, tipoSelecionado);
+
+        // Salva dados da sessão no localStorage
+        Session.save(result);
+
+        UI.showAlert('Login realizado! Redirecionando...', 'success');
+
+        // Redireciona conforme tipo de usuário
+        setTimeout(() => {
+          const tipo = result.data.tipo;
+          if (tipo === 'TREINADOR') {
+            window.location.href = 'dashboard-treinador.html';
+          } else {
+            window.location.href = 'dashboard-atleta.html';
+          }
+        }, 800);
+
+      } catch (err) {
+        UI.showAlert(err.message, 'error', document.querySelector('.alert-container'));
+        UI.setLoading(btn, false);
+      }
+    }
+  </script>
+</body>
+</html>

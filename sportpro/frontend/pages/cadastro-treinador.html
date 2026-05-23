@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro Treinador — SportPro</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <style>
+    body { display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 5rem 2rem 3rem; }
+    .cadastro-wrapper { width: 100%; max-width: 520px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem; transition: var(--transition); }
+    .back-link:hover { color: var(--brand); }
+    .cadastro-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem; }
+    .cadastro-header { margin-bottom: 2rem; }
+    .cadastro-header h1 { font-size: 2rem; }
+    .cadastro-header p { color: var(--text-muted); margin-top: 0.25rem; font-size: 0.9rem; }
+    .form-stack { display: flex; flex-direction: column; gap: 1.25rem; }
+    .alert-container { margin-bottom: 1rem; }
+    .role-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(200,255,0,0.1); color: var(--brand);
+      padding: 0.35rem 0.85rem; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="cadastro-wrapper">
+    <a href="index.html" class="back-link">← Voltar</a>
+
+    <div class="cadastro-card">
+      <div class="role-badge">🏋️ Perfil Profissional</div>
+
+      <div class="cadastro-header">
+        <h1>Criar conta de Treinador</h1>
+        <p>Registre-se e comece a gerenciar seus atletas com tecnologia.</p>
+      </div>
+
+      <div class="alert-container"></div>
+
+      <form class="form-stack" onsubmit="handleCadastro(event)">
+        <div class="form-group">
+          <label class="form-label">Nome completo</label>
+          <input type="text" id="nome" class="form-control" placeholder="Seu nome profissional" required minlength="3">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email profissional</label>
+          <input type="email" id="email" class="form-control" placeholder="treinador@email.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" id="senha" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Descrição profissional</label>
+          <textarea id="descricao" class="form-control" placeholder="Fale sobre sua experiência, certificações e especialidades..." rows="4"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="btn-cadastro">
+          Criar conta de Treinador
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-muted mt-2">
+        Já tem conta? <a href="login.html" style="color:var(--brand);font-weight:600;">Fazer login</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script>
+    async function handleCadastro(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-cadastro');
+      UI.setLoading(btn, true);
+
+      const payload = {
+        nome: document.getElementById('nome').value,
+        email: document.getElementById('email').value,
+        senha: document.getElementById('senha').value,
+        descricaoProfissional: document.getElementById('descricao').value
+      };
+
+      try {
+        const result = await TreinadorAPI.cadastrar(payload);
+        Session.save({ data: { ...result.data, tipo: 'TREINADOR' } });
+        UI.showAlert('Conta criada! Redirecionando...', 'success', document.querySelector('.alert-container'));
+        setTimeout(() => window.location.href = 'dashboard-treinador.html', 1000);
+      } catch (err) {
+        UI.showAlert(err.message, 'error', document.querySelector('.alert-container'));
+        UI.setLoading(btn, false);
+      }
+    }
+  </script>
+</body>
+</html>

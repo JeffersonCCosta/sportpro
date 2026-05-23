@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Atleta — SportPro</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <style>
+    /* ---- Stepper de progresso ---- */
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 2.5rem;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+    .step-circle {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--surface-2);
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    .step.done .step-circle { background: var(--brand); border-color: var(--brand); color: var(--dark); }
+    .step.active .step-circle { border-color: var(--brand); color: var(--brand); }
+    .step-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+    .step.active .step-label, .step.done .step-label { color: var(--text-primary); }
+    .step-line { height: 2px; width: 40px; background: var(--border); flex-shrink: 0; }
+    .step-line.done { background: var(--brand); }
+
+    /* ---- Cards de treinador ---- */
+    .treinador-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    .treinador-card {
+      background: var(--surface-2);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .treinador-card:hover { border-color: rgba(200,255,0,0.4); }
+    .treinador-card.selected { border-color: var(--brand); box-shadow: var(--shadow-glow); }
+    .treinador-card-avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(200,255,0,0.1);
+      color: var(--brand);
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .treinador-card-name { font-weight: 700; margin-bottom: 0.25rem; }
+    .treinador-card-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .treinador-card-modalidades { margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+    /* ---- Cronograma ---- */
+    .cronograma-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+    .cronograma-tab {
+      padding: 0.4rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .cronograma-tab.active { border-color: var(--brand); color: var(--brand); background: rgba(200,255,0,0.07); }
+
+    .cronograma-panel { display: none; }
+    .cronograma-panel.active { display: block; }
+
+    .panel-content {
+      display: none;
+    }
+    .panel-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .form-stack { display: flex; flex-direction: column; gap: 1.25rem; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .generate-btn-wrap {
+      background: linear-gradient(135deg, rgba(200,255,0,0.08) 0%, transparent 60%);
+      border: 1px solid rgba(200,255,0,0.2);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      text-align: center;
+    }
+    .generate-btn-wrap p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem; }
+
+    .cronograma-section { margin-bottom: 1.5rem; }
+    .cronograma-section-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--brand);
+      margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    @media (max-width: 600px) { .form-row-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-brand">Sport<span>Pro</span></div>
+    <div class="navbar-links">
+      <span id="nav-nome" style="color:var(--text-muted);font-size:0.9rem;"></span>
+      <button onclick="logout()" class="btn btn-outline btn-sm">Sair</button>
+    </div>
+  </nav>
+
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebar-avatar">A</div>
+        <div class="sidebar-name" id="sidebar-name">Carregando...</div>
+        <div class="sidebar-role">Atleta</div>
+      </div>
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Menu</span>
+        <button class="sidebar-link active" onclick="showPanel('visao-geral', this)" data-panel="visao-geral">
+          <span class="icon">📊</span> Visão Geral
+        </button>
+        <button class="sidebar-link" onclick="showPanel('selecionar-treinador', this)" data-panel="selecionar-treinador">
+          <span class="icon">🏋️</span> Selecionar Treinador
+        </button>
+        <button class="sidebar-link" onclick="showPanel('perfil-esportivo', this)" data-panel="perfil-esportivo">
+          <span class="icon">📝</span> Perfil Esportivo
+        </button>
+        <button class="sidebar-link" onclick="showPanel('cronograma', this)" data-panel="cronograma">
+          <span class="icon">📅</span> Meu Cronograma
+        </button>
+        <button class="sidebar-link" onclick="showPanel('historico', this)" data-panel="historico">
+          <span class="icon">🕒</span> Histórico
+        </button>
+      </nav>
+    </aside>
+
+    <main class="dashboard-main">
+
+      <!-- ===== Painel: Visão Geral ===== -->
+      <div class="panel-content active" id="panel-visao-geral">
+        <div class="dashboard-header">
+          <h2 id="greeting">Olá, Atleta!</h2>
+          <p>Sua jornada esportiva começa aqui</p>
+        </div>
+
+        <!-- Stepper de progresso -->
+        <div class="stepper" id="stepper">
+          <div class="step" id="step-1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Conta criada</div>
+          </div>
+          <div class="step-line" id="line-1"></div>
+          <div class="step" id="step-2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Treinador</div>
+          </div>
+          <div class="step-line" id="line-2"></div>
+          <div class="step" id="step-3">
+            <div class="step-circle">3</div>
+            <div class="step-label">Perfil</div>
+          </div>
+          <div class="step-line" id="line-3"></div>
+          <div class="step" id="step-4">
+            <div class="step-circle">4</div>
+            <div class="step-label">Cronograma</div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-imc">—</div>
+            <div class="stat-label">IMC calculado</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-treinador">—</div>
+            <div class="stat-label">Treinador</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-cronogramas">—</div>
+            <div class="stat-label">Cronogramas gerados</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom:1rem;">Próximo passo</h3>
+          <div id="next-step-content"></div>
+        </div>
+      </div>
+
+      <!-- ===== Painel: Selecionar Treinador ===== -->
+      <div class="panel-content" id="panel-selecionar-treinador">
+        <div class="dashboard-header">
+          <h2>Escolher Treinador</h2>
+          <p>Selecione a modalidade e depois escolha seu treinador</p>
+        </div>
+
+        <div class="card mb-3">
+          <div class="form-group" style="max-width:320px;">
+            <label class="form-label">Filtrar por modalidade</label>
+            <select id="filtro-modalidade" class="form-control" onchange="filtrarTreinadores()">
+              <option value="">Todas as modalidades</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="treinador-grid" id="treinadores-grid">
+          <div class="empty-state"><div class="icon">🏋️</div><p>Carregando treinadores...</p></div>
+        </div>
+
+        <div id="btn-confirmar-wrap" class="mt-3 hidden">
+          <button onclick="confirmarTreinador()" class="btn btn-primary" id="btn-confirmar-treinador">
+            Confirmar seleção
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== Painel: Perfil Esportivo ===== -->
+      <div class="panel-content" id="panel-perfil-esportivo">
+        <div class="dashboard-header">
+          <h2>Perfil Esportivo</h2>
+          <p>Complete seu perfil para receber um cronograma personalizado</p>
+        </div>
+
+        <div class="card">
+          <form class="form-stack" onsubmit="handlePerfil(event)">
+            <div class="form-group">
+              <label class="form-label">Objetivo esportivo</label>
+              <textarea id="objetivo" class="form-control" placeholder="Ex: Melhorar meu tempo nos 100m rasos, emagrecer 5kg, completar minha primeira corrida de rua..." rows="3" required></textarea>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Nível de experiência</label>
+                <select id="experiencia" class="form-control" required>
+                  <option value="">Selecione...</option>
+                  <option value="INICIANTE">🟢 Iniciante</option>
+                  <option value="INTERMEDIARIO">🟡 Intermediário</option>
+                  <option value="AVANCADO">🔴 Avançado</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Dias disponíveis por semana</label>
+                <select id="diasDisponiveis" class="form-control" required>
+                  <option value="">Selecione...</option>
+                  <option value="1">1 dia</option>
+                  <option value="2">2 dias</option>
+                  <option value="3">3 dias</option>
+                  <option value="4">4 dias</option>
+                  <option value="5">5 dias</option>
+                  <option value="6">6 dias</option>
+                  <option value="7">7 dias</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Limitações físicas ou lesões</label>
+              <textarea id="limitacoes" class="form-control" placeholder="Ex: Dor no joelho esquerdo, hérnia de disco... ou deixe em branco se não houver." rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Observações adicionais</label>
+              <textarea id="observacoes" class="form-control" placeholder="Qualquer informação relevante para o seu treinador..." rows="2"></textarea>
+            </div>
+
+            <div>
+              <button type="submit" class="btn btn-primary" id="btn-perfil">
+                Salvar Perfil Esportivo
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ===== Painel: Cronograma ===== -->
+      <div class="panel-content" id="panel-cronograma">
+        <div class="dashboard-header">
+          <h2>Meu Cronograma</h2>
+          <p>Seu plano personalizado de treino e dieta</p>
+        </div>
+
+        <div class="generate-btn-wrap mb-3" id="gerar-cronograma-wrap">
+          <p>Gere seu cronograma personalizado com base no seu perfil esportivo.<br>
+          O sistema processará seus dados e criará um plano sob medida.</p>
+          <button onclick="gerarCronograma()" class="btn btn-primary" id="btn-gerar">
+            ⚡ Gerar Cronograma Personalizado
+          </button>
+        </div>
+
+        <div id="cronograma-resultado" class="hidden">
+          <div class="cronograma-tabs">
+            <button class="cronograma-tab active" onclick="showCronogramaTab('treino', this)">🏃 Treino Semanal</button>
+            <button class="cronograma-tab" onclick="showCronogramaTab('dieta', this)">🥗 Plano Alimentar</button>
+            <button class="cronograma-tab" onclick="showCronogramaTab('obs', this)">📝 Observações</button>
+          </div>
+
+          <div class="cronograma-panel active" id="cpanel-treino">
+            <div class="cronograma-block" id="cronograma-treino"></div>
+          </div>
+          <div class="cronograma-panel" id="cpanel-dieta">
+            <div class="cronograma-block" id="cronograma-dieta"></div>
+          </div>
+          <div class="cronograma-panel" id="cpanel-obs">
+            <div class="cronograma-block" id="cronograma-obs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Painel: Histórico ===== -->
+      <div class="panel-content" id="panel-historico">
+        <div class="dashboard-header">
+          <h2>Histórico de Cronogramas</h2>
+          <p>Todos os cronogramas gerados anteriormente</p>
+        </div>
+        <div id="historico-list"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script>
+    let USER = null;
+    let treinadorSelecionado = null;
+    let modalidadeSelecionada = null;
+    let todosTreinadores = [];
+    let todasModalidades = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      USER = Session.requireAuth('ATLETA');
+      if (!USER) return;
+
+      document.getElementById('nav-nome').textContent = USER.nome;
+      document.getElementById('sidebar-name').textContent = USER.nome;
+      document.getElementById('sidebar-avatar').textContent = UI.initials(USER.nome);
+      document.getElementById('greeting').textContent = `Olá, ${USER.nome.split(' ')[0]}!`;
+
+      await carregarDadosIniciais();
+    });
+
+    async function carregarDadosIniciais() {
+      try {
+        // Carrega dados do atleta atualizado
+        const atletaRes = await AtletaAPI.buscarPorId(USER.id);
+        const atleta = atletaRes.data;
+
+        // Treinador vinculado — mostra nome ou status
+        document.getElementById('stat-treinador').textContent = atleta.treinadorNome || '—';
+        // IMC atualizado
+        if (atleta.peso && atleta.altura) {
+          const imc = (atleta.peso / (atleta.altura ** 2)).toFixed(1);
+          document.getElementById('stat-imc').textContent = imc;
+        }
+
+        // Cronogramas — carregado antes do stepper para passar o total
+        const cronosRes = await AtletaAPI.listarCronogramas(USER.id);
+        const cronos = cronosRes.data || [];
+        const totalCronogramas = cronos.length;
+        document.getElementById('stat-cronogramas').textContent = totalCronogramas;
+
+        // Stepper — atualizado com o total de cronogramas
+        atualizarStepper(atleta, totalCronogramas);
+
+        // Próximo passo
+        renderProximoPasso(atleta, totalCronogramas);
+
+        // Carrega treinadores e modalidades para o seletor
+        await carregarTreinadoresEModalidades();
+
+        // Carrega histórico
+        renderHistorico(cronos);
+
+        // Se tiver cronograma, mostra o mais recente
+        if (cronos.length > 0) {
+          mostrarCronograma(cronos[0]);
+        }
+
+        // Pré-preenche perfil se existir
+        if (atleta.objetivo) {
+          document.getElementById('objetivo').value = atleta.objetivo || '';
+          document.getElementById('experiencia').value = atleta.experiencia || '';
+          document.getElementById('diasDisponiveis').value = atleta.diasDisponiveis || '';
+          document.getElementById('limitacoes').value = atleta.limitacoesFisicas || '';
+          document.getElementById('observacoes').value = atleta.observacoes || '';
+        }
+
+        // Pré-seleciona treinador/modalidade se já vinculados
+        if (atleta.treinadorId) {
+          treinadorSelecionado = { id: atleta.treinadorId, nome: atleta.treinadorNome };
+        }
+        if (atleta.modalidadeId) {
+          modalidadeSelecionada = { id: atleta.modalidadeId, nome: atleta.modalidadeNome };
+        }
+
+      } catch (err) {
+        console.error(err);
+        UI.showAlert('Erro ao carregar dados: ' + err.message, 'error');
+      }
+    }
+
+    function atualizarStepper(atleta, totalCronogramas) {
+      // Limpa todas as classes antes de reaplicar — evita estado residual entre recargas
+      [1,2,3,4].forEach(n => {
+        document.getElementById('step-' + n).classList.remove('done', 'active');
+      });
+      [1,2,3].forEach(n => {
+        document.getElementById('line-' + n).classList.remove('done');
+      });
+
+      // Passo 1: conta criada (sempre done)
+      document.getElementById('step-1').classList.add('done');
+      document.getElementById('line-1').classList.add('done');
+
+      // Passo 2: treinador vinculado
+      if (atleta.treinadorId) {
+        document.getElementById('step-2').classList.add('done');
+        document.getElementById('line-2').classList.add('done');
+      } else {
+        document.getElementById('step-2').classList.add('active');
+      }
+
+      // Passo 3: perfil esportivo preenchido
+      if (atleta.objetivo) {
+        document.getElementById('step-3').classList.add('done');
+        document.getElementById('line-3').classList.add('done');
+      } else if (atleta.treinadorId) {
+        document.getElementById('step-3').classList.add('active');
+      }
+
+      // Passo 4: cronograma gerado
+      if (totalCronogramas > 0) {
+        document.getElementById('step-4').classList.add('done');
+      } else if (atleta.objetivo) {
+        document.getElementById('step-4').classList.add('active');
+      }
+    }
+
+    function renderProximoPasso(atleta, totalCronogramas) {
+      const el = document.getElementById('next-step-content');
+      if (!atleta.treinadorId) {
+        el.innerHTML = `
+          <p class="text-muted mb-2">Você ainda não selecionou um treinador.</p>
+          <button onclick="showPanel('selecionar-treinador')" class="btn btn-primary btn-sm">
+            Selecionar Treinador →
+          </button>`;
+      } else if (!atleta.objetivo) {
+        el.innerHTML = `
+          <p class="text-muted mb-2">Treinador selecionado! Complete seu perfil esportivo.</p>
+          <button onclick="showPanel('perfil-esportivo')" class="btn btn-primary btn-sm">
+            Completar Perfil →
+          </button>`;
+      } else if (totalCronogramas === 0) {
+        el.innerHTML = `
+          <p class="text-muted mb-2">Perfil completo! Agora gere seu cronograma personalizado.</p>
+          <button onclick="showPanel('cronograma')" class="btn btn-primary btn-sm">
+            Gerar Cronograma →
+          </button>`;
+      } else {
+        el.innerHTML = `
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <div style="font-size:2rem;">🎉</div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.25rem;">Tudo certo! Você tem ${totalCronogramas} cronograma${totalCronogramas > 1 ? 's' : ''} gerado${totalCronogramas > 1 ? 's' : ''}.</div>
+              <p class="text-muted" style="font-size:0.88rem;">Acompanhe seu progresso e gere novos cronogramas quando precisar.</p>
+            </div>
+          </div>
+          <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <button onclick="showPanel('cronograma')" class="btn btn-primary btn-sm">
+              Ver Cronograma →
+            </button>
+            <button onclick="showPanel('historico')" class="btn btn-outline btn-sm">
+              Ver Histórico
+            </button>
+          </div>`;
+      }
+    }
+
+    async function carregarTreinadoresEModalidades() {
+      const [treinRes, modRes] = await Promise.all([
+        TreinadorAPI.listar(),
+        ModalidadeAPI.listar()
+      ]);
+      todosTreinadores = treinRes.data || [];
+      todasModalidades = modRes.data || [];
+
+      // Popula select de modalidades
+      const sel = document.getElementById('filtro-modalidade');
+      todasModalidades.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.nome;
+        sel.appendChild(opt);
+      });
+
+      renderTreinadores(todosTreinadores);
+    }
+
+    function filtrarTreinadores() {
+      const modId = document.getElementById('filtro-modalidade').value;
+      if (!modId) {
+        renderTreinadores(todosTreinadores);
+        return;
+      }
+      // Filtra treinadores que têm a modalidade selecionada
+      const filtrados = todosTreinadores.filter(t =>
+        t.modalidades && t.modalidades.some(m => String(m.id) === String(modId))
+      );
+      renderTreinadores(filtrados);
+      if (modId) {
+        modalidadeSelecionada = todasModalidades.find(m => String(m.id) === String(modId));
+      }
+    }
+
+    function renderTreinadores(treinadores) {
+      const grid = document.getElementById('treinadores-grid');
+      if (!treinadores.length) {
+        grid.innerHTML = `<div class="empty-state"><div class="icon">🏋️</div><p>Nenhum treinador disponível para esta modalidade.</p></div>`;
+        return;
+      }
+      grid.innerHTML = treinadores.map(t => `
+        <div class="treinador-card ${treinadorSelecionado && treinadorSelecionado.id === t.id ? 'selected' : ''}"
+             onclick="selecionarTreinador(${t.id}, '${t.nome}', this)">
+          <div class="treinador-card-avatar">${UI.initials(t.nome)}</div>
+          <div class="treinador-card-name">${t.nome}</div>
+          <div class="treinador-card-desc">${t.descricaoProfissional || 'Treinador profissional cadastrado no SportPro.'}</div>
+          <div class="treinador-card-modalidades">
+            ${(t.modalidades || []).slice(0,3).map(m =>
+              `<span class="badge badge-brand">${m.nome}</span>`
+            ).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selecionarTreinador(id, nome, el) {
+      document.querySelectorAll('.treinador-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      treinadorSelecionado = { id, nome };
+      document.getElementById('btn-confirmar-wrap').classList.remove('hidden');
+    }
+
+    async function confirmarTreinador() {
+      if (!treinadorSelecionado) return;
+      // Seleciona a primeira modalidade do treinador se nenhuma foi filtrada
+      if (!modalidadeSelecionada) {
+        const treinadorFull = todosTreinadores.find(t => t.id === treinadorSelecionado.id);
+        if (treinadorFull && treinadorFull.modalidades && treinadorFull.modalidades.length > 0) {
+          modalidadeSelecionada = treinadorFull.modalidades[0];
+        }
+      }
+      if (!modalidadeSelecionada) {
+        UI.showAlert('Selecione uma modalidade antes de confirmar.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btn-confirmar-treinador');
+      UI.setLoading(btn, true);
+      try {
+        // Atualiza o atleta com treinador e modalidade selecionados
+        await AtletaAPI.atualizarPerfil({
+          atletaId: USER.id,
+          treinadorId: treinadorSelecionado.id,
+          modalidadeId: modalidadeSelecionada.id,
+          objetivo: document.getElementById('objetivo').value || 'A definir',
+          experiencia: document.getElementById('experiencia').value || 'INICIANTE',
+          diasDisponiveis: parseInt(document.getElementById('diasDisponiveis').value) || 3
+        });
+        UI.showAlert(`Treinador ${treinadorSelecionado.nome} selecionado!`, 'success');
+        await carregarDadosIniciais();
+        showPanel('perfil-esportivo');
+      } catch (err) {
+        UI.showAlert(err.message, 'error');
+      } finally {
+        UI.setLoading(btn, false);
+      }
+    }
+
+    async function handlePerfil(e) {
+      e.preventDefault();
+      if (!treinadorSelecionado) {
+        UI.showAlert('Selecione um treinador primeiro!', 'error');
+        return;
+      }
+      const btn = document.getElementById('btn-perfil');
+      UI.setLoading(btn, true);
+      try {
+        await AtletaAPI.atualizarPerfil({
+          atletaId: USER.id,
+          treinadorId: treinadorSelecionado.id,
+          modalidadeId: modalidadeSelecionada ? modalidadeSelecionada.id : null,
+          objetivo: document.getElementById('objetivo').value,
+          experiencia: document.getElementById('experiencia').value,
+          diasDisponiveis: parseInt(document.getElementById('diasDisponiveis').value),
+          limitacoesFisicas: document.getElementById('limitacoes').value,
+          observacoes: document.getElementById('observacoes').value
+        });
+        UI.showAlert('Perfil salvo! Agora gere seu cronograma.', 'success');
+        await carregarDadosIniciais();
+        setTimeout(() => showPanel('cronograma'), 1200);
+      } catch (err) {
+        UI.showAlert(err.message, 'error');
+      } finally {
+        UI.setLoading(btn, false);
+      }
+    }
+
+    async function gerarCronograma() {
+      const btn = document.getElementById('btn-gerar');
+      UI.setLoading(btn, true);
+      try {
+        const res = await AtletaAPI.gerarCronograma(USER.id);
+        const cronograma = res.data;
+
+        // Mostra o cronograma na aba atual
+        mostrarCronograma(cronograma);
+
+        // Recarrega todos os dados (stepper, stats, histórico, próximo passo)
+        await carregarDadosIniciais();
+
+        UI.showAlert('Cronograma gerado com sucesso!', 'success');
+
+        // Volta para visão geral para o atleta ver os passos atualizados
+        setTimeout(() => {
+          showPanel('visao-geral');
+        }, 1500);
+
+      } catch (err) {
+        UI.showAlert(err.message, 'error');
+      } finally {
+        UI.setLoading(btn, false);
+      }
+    }
+
+    function mostrarCronograma(cronograma) {
+      document.getElementById('cronograma-resultado').classList.remove('hidden');
+      document.getElementById('cronograma-treino').textContent = cronograma.treinoSemanal || '—';
+      document.getElementById('cronograma-dieta').textContent = cronograma.dieta || '—';
+      document.getElementById('cronograma-obs').textContent = cronograma.observacoes || '—';
+    }
+
+    function renderHistorico(cronos) {
+      const el = document.getElementById('historico-list');
+      if (!cronos.length) {
+        el.innerHTML = `<div class="empty-state"><div class="icon">🕒</div><p>Nenhum cronograma gerado ainda.</p></div>`;
+        return;
+      }
+      el.innerHTML = cronos.map((c, i) => `
+        <div class="card mb-2">
+          <div class="flex-between mb-2">
+            <div>
+              <span class="badge badge-green">${c.status}</span>
+              <span class="text-muted text-sm ml-1">${UI.formatDate(c.criadoEm)}</span>
+            </div>
+            <span class="text-muted text-sm">#${c.id}</span>
+          </div>
+          <div style="font-size:0.85rem;color:var(--text-muted);white-space:pre-wrap;max-height:120px;overflow:hidden;">
+            ${c.treinoSemanal.substring(0, 300)}...
+          </div>
+          <button onclick="expandirCronograma(${i})" class="btn btn-outline btn-sm mt-2">Ver completo</button>
+          <div id="historico-full-${i}" class="hidden mt-2">
+            <div class="cronograma-block">${c.treinoSemanal}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function expandirCronograma(i) {
+      const el = document.getElementById(`historico-full-${i}`);
+      el.classList.toggle('hidden');
+    }
+
+    function showCronogramaTab(tab, btn) {
+      document.querySelectorAll('.cronograma-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.cronograma-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`cpanel-${tab}`).classList.add('active');
+    }
+
+    function showPanel(panel, btn) {
+      // Oculta todos os painéis
+      document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('active'));
+
+      // Remove active de todos os links da sidebar
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+      // Ativa o painel correto
+      document.getElementById('panel-' + panel).classList.add('active');
+
+      // Ativa o link da sidebar pelo data-panel (robusto, não depende de querySelector frágil)
+      const sidebarBtn = document.querySelector('.sidebar-link[data-panel="' + panel + '"]');
+      if (sidebarBtn) sidebarBtn.classList.add('active');
+    }
+
+    function logout() {
+      Session.clear();
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

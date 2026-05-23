@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Treinador — SportPro</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <style>
+    /* ---- Painel de abas ---- */
+    .tab-nav {
+      display: flex;
+      gap: 0.25rem;
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 0.55rem 1.1rem;
+      border-radius: 5px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .tab-btn.active { background: var(--surface); color: var(--text-primary); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Atleta card ---- */
+    .atleta-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: var(--transition);
+    }
+    .atleta-card:hover { border-color: rgba(200,255,0,0.25); }
+    .atleta-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(200,255,0,0.12);
+      color: var(--brand);
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .atleta-info { flex: 1; }
+    .atleta-name { font-weight: 600; font-size: 0.95rem; }
+    .atleta-meta { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* ---- Modalidade/Metodologia card ---- */
+    .item-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .item-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+    }
+    .item-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
+    .item-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ---- Form inline ---- */
+    .inline-form {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .inline-form h3 { margin-bottom: 1.25rem; font-size: 1rem; }
+    .form-stack { display: flex; flex-direction: column; gap: 1rem; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .section-header h3 { font-size: 1rem; }
+
+    .empty-state {
+      text-align: center; padding: 3rem 1rem;
+      color: var(--text-muted); font-size: 0.9rem;
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+    @media (max-width: 600px) { .form-row-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">Sport<span>Pro</span></div>
+    <div class="navbar-links">
+      <span id="nav-nome" style="color:var(--text-muted);font-size:0.9rem;"></span>
+      <button onclick="logout()" class="btn btn-outline btn-sm">Sair</button>
+    </div>
+  </nav>
+
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebar-avatar">T</div>
+        <div class="sidebar-name" id="sidebar-name">Carregando...</div>
+        <div class="sidebar-role">Treinador</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Menu</span>
+        <button class="sidebar-link active" onclick="showTab('overview', this)">
+          <span class="icon">📊</span> Visão Geral
+        </button>
+        <button class="sidebar-link" onclick="showTab('atletas', this)">
+          <span class="icon">🤸</span> Meus Atletas
+        </button>
+        <button class="sidebar-link" onclick="showTab('modalidades', this)">
+          <span class="icon">🏅</span> Modalidades
+        </button>
+        <button class="sidebar-link" onclick="showTab('metodologias', this)">
+          <span class="icon">📋</span> Metodologias
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="dashboard-main">
+
+      <!-- Tab: Visão Geral -->
+      <div class="tab-panel active" id="tab-overview">
+        <div class="dashboard-header">
+          <h2 id="greeting">Olá, Treinador!</h2>
+          <p>Seu painel de gestão esportiva</p>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-atletas">—</div>
+            <div class="stat-label">Atletas vinculados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-modalidades">—</div>
+            <div class="stat-label">Modalidades</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-metodologias">—</div>
+            <div class="stat-label">Metodologias</div>
+          </div>
+        </div>
+
+        <!-- Lista rápida de atletas recentes -->
+        <div class="card">
+          <h3 style="margin-bottom:1rem;">Atletas recentes</h3>
+          <div id="atletas-recentes">
+            <div class="empty-state">
+              <div class="icon">🤸</div>
+              <p>Nenhum atleta vinculado ainda.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Atletas -->
+      <div class="tab-panel" id="tab-atletas">
+        <div class="dashboard-header">
+          <h2>Meus Atletas</h2>
+          <p>Gerencie os atletas vinculados a você</p>
+        </div>
+        <div id="atletas-list" class="item-list"></div>
+      </div>
+
+      <!-- Tab: Modalidades -->
+      <div class="tab-panel" id="tab-modalidades">
+        <div class="dashboard-header">
+          <h2>Modalidades</h2>
+          <p>Cadastre as modalidades esportivas que você atende</p>
+        </div>
+
+        <!-- Formulário de cadastro -->
+        <div class="inline-form">
+          <h3>➕ Nova Modalidade</h3>
+          <form class="form-stack" onsubmit="handleModalidade(event)">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Nome da modalidade</label>
+                <input type="text" id="mod-nome" class="form-control" placeholder="Ex: 100m rasos" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <input type="text" id="mod-desc" class="form-control" placeholder="Breve descrição">
+              </div>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-primary btn-sm" id="btn-mod">Cadastrar Modalidade</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="section-header">
+          <h3>Suas modalidades</h3>
+        </div>
+        <div id="modalidades-list" class="item-list"></div>
+      </div>
+
+      <!-- Tab: Metodologias -->
+      <div class="tab-panel" id="tab-metodologias">
+        <div class="dashboard-header">
+          <h2>Metodologias de Treino</h2>
+          <p>Defina estratégias e critérios de evolução</p>
+        </div>
+
+        <div class="inline-form">
+          <h3>➕ Nova Metodologia</h3>
+          <form class="form-stack" onsubmit="handleMetodologia(event)">
+            <div class="form-group">
+              <label class="form-label">Título</label>
+              <input type="text" id="met-titulo" class="form-control" placeholder="Ex: Método Periodização Linear" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Descrição geral</label>
+              <textarea id="met-desc" class="form-control" placeholder="Descreva a metodologia..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estratégias de treino</label>
+              <textarea id="met-estrategias" class="form-control" placeholder="Quais estratégias são utilizadas?"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Recomendações alimentares</label>
+              <textarea id="met-alimentar" class="form-control" placeholder="Orientações nutricionais gerais..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Critérios de evolução</label>
+              <textarea id="met-criterios" class="form-control" placeholder="Como medir a evolução do atleta?"></textarea>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-primary btn-sm" id="btn-met">Cadastrar Metodologia</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="metodologias-list" class="item-list"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script>
+    // ---- Inicialização ----
+    let USER = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      USER = Session.requireAuth('TREINADOR');
+      if (!USER) return;
+
+      // Preenche sidebar e navbar
+      document.getElementById('nav-nome').textContent = USER.nome;
+      document.getElementById('sidebar-name').textContent = USER.nome;
+      document.getElementById('sidebar-avatar').textContent = UI.initials(USER.nome);
+      document.getElementById('greeting').textContent = `Olá, ${USER.nome.split(' ')[0]}!`;
+
+      await carregarDados();
+    });
+
+    // ---- Carrega todos os dados do treinador ----
+    async function carregarDados() {
+      try {
+        const [atletasRes, modalidadesRes, metodologiasRes] = await Promise.all([
+          AtletaAPI.listarPorTreinador(USER.id),
+          ModalidadeAPI.listarPorTreinador(USER.id),
+          MetodologiaAPI.listarPorTreinador(USER.id)
+        ]);
+
+        const atletas = atletasRes.data || [];
+        const modalidades = modalidadesRes.data || [];
+        const metodologias = metodologiasRes.data || [];
+
+        // Stats
+        document.getElementById('stat-atletas').textContent = atletas.length;
+        document.getElementById('stat-modalidades').textContent = modalidades.length;
+        document.getElementById('stat-metodologias').textContent = metodologias.length;
+
+        renderAtletas(atletas);
+        renderModalidades(modalidades);
+        renderMetodologias(metodologias);
+
+      } catch (err) {
+        console.error('Erro ao carregar dados:', err);
+      }
+    }
+
+    // ---- Renderiza atletas ----
+    function renderAtletas(atletas) {
+      const listEl = document.getElementById('atletas-list');
+      const recentEl = document.getElementById('atletas-recentes');
+
+      if (!atletas.length) {
+        const emptyHtml = `<div class="empty-state"><div class="icon">🤸</div><p>Nenhum atleta ainda. Compartilhe seu perfil para receber atletas.</p></div>`;
+        listEl.innerHTML = emptyHtml;
+        recentEl.innerHTML = emptyHtml;
+        return;
+      }
+
+      const html = atletas.map(a => `
+        <div class="atleta-card">
+          <div class="atleta-avatar">${UI.initials(a.nome)}</div>
+          <div class="atleta-info">
+            <div class="atleta-name">${a.nome}</div>
+            <div class="atleta-meta">
+              ${a.modalidadeNome || 'Sem modalidade'} ·
+              ${a.experiencia || 'Perfil incompleto'} ·
+              ${a.objetivo ? a.objetivo.substring(0,40) + '...' : 'Sem objetivo definido'}
+            </div>
+          </div>
+          <span class="badge ${a.treinadorId ? 'badge-green' : 'badge-yellow'}">
+            ${a.treinadorId ? 'Ativo' : 'Pendente'}
+          </span>
+        </div>
+      `).join('');
+
+      listEl.innerHTML = html;
+      recentEl.innerHTML = atletas.slice(0,3).map(a => `
+        <div class="atleta-card">
+          <div class="atleta-avatar">${UI.initials(a.nome)}</div>
+          <div class="atleta-info">
+            <div class="atleta-name">${a.nome}</div>
+            <div class="atleta-meta">${a.modalidadeNome || '—'} · ${a.experiencia || '—'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ---- Renderiza modalidades ----
+    function renderModalidades(modalidades) {
+      const el = document.getElementById('modalidades-list');
+      if (!modalidades.length) {
+        el.innerHTML = `<div class="empty-state"><div class="icon">🏅</div><p>Nenhuma modalidade cadastrada.</p></div>`;
+        return;
+      }
+      el.innerHTML = modalidades.map(m => `
+        <div class="item-card">
+          <div class="item-title">${m.nome}</div>
+          <div class="item-desc">${m.descricao || 'Sem descrição'}</div>
+        </div>
+      `).join('');
+    }
+
+    // ---- Renderiza metodologias ----
+    function renderMetodologias(metodologias) {
+      const el = document.getElementById('metodologias-list');
+      if (!metodologias.length) {
+        el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Nenhuma metodologia cadastrada.</p></div>`;
+        return;
+      }
+      el.innerHTML = metodologias.map(m => `
+        <div class="item-card">
+          <div class="item-title">${m.titulo}</div>
+          <div class="item-desc">${m.descricao}</div>
+          ${m.estrategias ? `<div class="item-desc mt-1"><strong style="color:var(--brand)">Estratégias:</strong> ${m.estrategias.substring(0,100)}...</div>` : ''}
+          <div class="item-desc mt-1" style="font-size:0.75rem;color:var(--text-muted)">Cadastrada em ${UI.formatDate(m.criadoEm)}</div>
+        </div>
+      `).join('');
+    }
+
+    // ---- Cadastrar modalidade ----
+    async function handleModalidade(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-mod');
+      UI.setLoading(btn, true);
+      try {
+        await ModalidadeAPI.cadastrar({
+          nome: document.getElementById('mod-nome').value,
+          descricao: document.getElementById('mod-desc').value,
+          treinadorId: USER.id
+        });
+        e.target.reset();
+        await carregarDados();
+        UI.showAlert('Modalidade cadastrada!', 'success');
+      } catch (err) {
+        UI.showAlert(err.message, 'error');
+      } finally {
+        UI.setLoading(btn, false);
+      }
+    }
+
+    // ---- Cadastrar metodologia ----
+    async function handleMetodologia(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-met');
+      UI.setLoading(btn, true);
+      try {
+        await MetodologiaAPI.cadastrar({
+          titulo: document.getElementById('met-titulo').value,
+          descricao: document.getElementById('met-desc').value,
+          estrategias: document.getElementById('met-estrategias').value,
+          recomendacoesAlimentares: document.getElementById('met-alimentar').value,
+          criteriosEvolucao: document.getElementById('met-criterios').value,
+          treinadorId: USER.id
+        });
+        e.target.reset();
+        await carregarDados();
+        UI.showAlert('Metodologia cadastrada!', 'success');
+      } catch (err) {
+        UI.showAlert(err.message, 'error');
+      } finally {
+        UI.setLoading(btn, false);
+      }
+    }
+
+    // ---- Navegação por abas ----
+    function showTab(tab, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function logout() {
+      Session.clear();
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

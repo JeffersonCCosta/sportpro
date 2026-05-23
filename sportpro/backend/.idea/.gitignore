@@ -1,0 +1,21 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Maven
+target/
+*.jar
+*.war
+
+# SEGURANÇA — nunca subir credenciais
+**/application.properties
+
+# OS
+.DS_Store
+Thumbs.db
