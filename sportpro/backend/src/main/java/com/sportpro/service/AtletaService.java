@@ -16,9 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * AtletaService — Lógica de negócio para Atleta.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,12 +23,8 @@ public class AtletaService {
 
     private final AtletaRepository atletaRepository;
     private final TreinadorRepository treinadorRepository;
-    private final ModalidadeRepository modalidadeRepository;
     private final PasswordEncoder passwordEncoder;
 
-    /**
-     * Cadastra um novo atleta (RF004).
-     */
     @Transactional
     public AtletaResponseDto cadastrar(AtletaRequest request) {
         log.info("Cadastrando atleta: {}", request.getEmail());
@@ -49,13 +42,12 @@ public class AtletaService {
                 .altura(request.getAltura())
                 .build();
 
-        Atleta salvo = atletaRepository.save(atleta);
-        return toDto(salvo);
+        return toDto(atletaRepository.save(atleta));
     }
 
     /**
-     * Atualiza perfil esportivo do atleta (RF007).
-     * Vincula treinador e modalidade escolhidos.
+     * Atualiza perfil esportivo do atleta.
+     * Modalidade agora é salva como String (nome) — sem FK para tabela de modalidades.
      */
     @Transactional
     public AtletaResponseDto atualizarPerfil(PerfilEsportivoRequest request) {
@@ -65,17 +57,13 @@ public class AtletaService {
         Treinador treinador = treinadorRepository.findById(request.getTreinadorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Treinador não encontrado"));
 
-        Modalidade modalidade = modalidadeRepository.findById(request.getModalidadeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Modalidade não encontrada"));
-
-        // Atualiza dados do perfil esportivo
         atleta.setObjetivo(request.getObjetivo());
         atleta.setExperiencia(request.getExperiencia());
         atleta.setDiasDisponiveis(request.getDiasDisponiveis());
         atleta.setLimitacoesFisicas(request.getLimitacoesFisicas());
         atleta.setObservacoes(request.getObservacoes());
         atleta.setTreinador(treinador);
-        atleta.setModalidade(modalidade);
+        atleta.setModalidadeNome(request.getModalidadeNome());
 
         return toDto(atletaRepository.save(atleta));
     }
@@ -111,8 +99,7 @@ public class AtletaService {
                 .criadoEm(a.getCriadoEm())
                 .treinadorId(a.getTreinador() != null ? a.getTreinador().getId() : null)
                 .treinadorNome(a.getTreinador() != null ? a.getTreinador().getNome() : null)
-                .modalidadeId(a.getModalidade() != null ? a.getModalidade().getId() : null)
-                .modalidadeNome(a.getModalidade() != null ? a.getModalidade().getNome() : null)
+                .modalidadeNome(a.getModalidadeNome())
                 .build();
     }
 }

@@ -64,13 +64,9 @@ public class Atleta {
     @Column(columnDefinition = "TEXT")
     private String observacoes;
 
-    /**
-     * Modalidade escolhida pelo atleta.
-     * ManyToOne: vários atletas podem escolher a mesma modalidade.
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "modalidade_id")
-    private Modalidade modalidade;
+    /** Nome da modalidade escolhida (dropdown fixo: "100m rasos", "Maratona" etc.) */
+    @Column(length = 50)
+    private String modalidadeNome;
 
     /**
      * Treinador selecionado pelo atleta.

@@ -7,9 +7,7 @@ import java.util.List;
 
 /**
  * Treinador — Entidade JPA que representa um treinador cadastrado.
- *
- * Mapeada para a tabela `treinadores` no MySQL.
- * Um treinador possui várias modalidades e metodologias.
+ * Possui vários PlanosTreino (modalidade + metodologia + nutrição unificados).
  */
 @Entity
 @Table(name = "treinadores")
@@ -27,11 +25,9 @@ public class Treinador {
     @Column(nullable = false, length = 100)
     private String nome;
 
-    /** Email único — usado no login */
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    /** Senha armazenada como hash BCrypt — nunca texto puro */
     @Column(nullable = false)
     private String senha;
 
@@ -39,20 +35,11 @@ public class Treinador {
     private String descricaoProfissional;
 
     /**
-     * Relacionamento 1:N com modalidades.
-     * cascade = ALL: operações no treinador propagam para modalidades.
-     * orphanRemoval = true: remove modalidades sem treinador.
+     * Planos de treino do treinador (unifica modalidade + metodologia + nutrição).
      */
     @OneToMany(mappedBy = "treinador", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Modalidade> modalidades;
+    private List<PlanoTreino> planosTreino;
 
-    /**
-     * Relacionamento 1:N com metodologias de treino.
-     */
-    @OneToMany(mappedBy = "treinador", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Metodologia> metodologias;
-
-    /** Data de cadastro — preenchida automaticamente */
     @Column(nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 

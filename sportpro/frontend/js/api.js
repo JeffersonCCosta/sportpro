@@ -180,3 +180,35 @@ const UI = {
   /** Retorna iniciais do nome */
   initials: (name) => name ? name.split(' ').slice(0,2).map(n => n[0]).join('').toUpperCase() : '?'
 };
+
+// ================================================================
+// Endpoints — Planos de Treino
+// ================================================================
+const PlanoTreinoAPI = {
+    salvar: (data) => request('/planos-treino', { method: 'POST', body: JSON.stringify(data) }),
+    listarTodos: () => request('/planos-treino/todos'),
+    listarPorTreinador: (id) => request(`/planos-treino/treinador/${id}`),
+    buscarPorId: (id) => request(`/planos-treino/${id}`),
+    excluir: (id) => request(`/planos-treino/${id}`, { method: 'DELETE' })
+};
+
+// ================================================================
+// Constantes fixas — Modalidades e Níveis (dropdown do sistema)
+// ================================================================
+const MODALIDADES = [
+    '100m rasos',
+    '200m rasos',
+    '400m rasos',
+    '800m',
+    '1500m',
+    '5000m',
+    '10km',
+    'Meia-maratona',
+    'Maratona'
+];
+
+const NIVEIS = [
+    { value: 'INICIANTE',     label: '🟢 Iniciante' },
+    { value: 'INTERMEDIARIO', label: '🟡 Intermediário' },
+    { value: 'AVANCADO',      label: '🔴 Avançado' }
+];

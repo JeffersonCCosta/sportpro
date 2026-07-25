@@ -212,20 +212,24 @@
       <div class="panel-content" id="panel-selecionar-treinador">
         <div class="dashboard-header">
           <h2>Escolher Treinador</h2>
-          <p>Selecione a modalidade e depois escolha seu treinador</p>
+          <p>Selecione a modalidade para ver os treinadores disponíveis</p>
         </div>
 
+        <!-- Passo 1: escolha a modalidade -->
         <div class="card mb-3">
-          <div class="form-group" style="max-width:320px;">
-            <label class="form-label">Filtrar por modalidade</label>
-            <select id="filtro-modalidade" class="form-control" onchange="filtrarTreinadores()">
-              <option value="">Todas as modalidades</option>
-            </select>
+          <label class="form-label">Modalidade esportiva</label>
+          <div id="modalidades-btn-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.75rem;margin-top:0.75rem;">
+            <!-- botões gerados via JS -->
           </div>
         </div>
 
-        <div class="treinador-grid" id="treinadores-grid">
-          <div class="empty-state"><div class="icon">🏋️</div><p>Carregando treinadores...</p></div>
+        <!-- Passo 2: treinadores da modalidade -->
+        <div id="treinadores-section" class="hidden">
+          <div class="flex-between mb-2">
+            <h3 style="font-size:1rem;" id="treinadores-titulo">Treinadores disponíveis</h3>
+            <button onclick="limparModalidade()" class="btn btn-outline btn-sm">← Trocar modalidade</button>
+          </div>
+          <div class="treinador-grid" id="treinadores-grid"></div>
         </div>
 
         <div id="btn-confirmar-wrap" class="mt-3 hidden">
@@ -346,6 +350,7 @@
     let modalidadeSelecionada = null;
     let todosTreinadores = [];
     let todasModalidades = [];
+    let todosPlanos = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
       USER = Session.requireAuth('ATLETA');
@@ -365,9 +370,9 @@
         const atletaRes = await AtletaAPI.buscarPorId(USER.id);
         const atleta = atletaRes.data;
 
-        // Treinador vinculado — mostra nome ou status
+        // Treinador vinculado
         document.getElementById('stat-treinador').textContent = atleta.treinadorNome || '—';
-        // IMC atualizado
+        // IMC
         if (atleta.peso && atleta.altura) {
           const imc = (atleta.peso / (atleta.altura ** 2)).toFixed(1);
           document.getElementById('stat-imc').textContent = imc;
@@ -409,8 +414,8 @@
         if (atleta.treinadorId) {
           treinadorSelecionado = { id: atleta.treinadorId, nome: atleta.treinadorNome };
         }
-        if (atleta.modalidadeId) {
-          modalidadeSelecionada = { id: atleta.modalidadeId, nome: atleta.modalidadeNome };
+        if (atleta.modalidadeNome) {
+          modalidadeSelecionada = { nome: atleta.modalidadeNome };
         }
 
       } catch (err) {
@@ -496,61 +501,129 @@
       }
     }
 
+    /**
+     * Carrega todos os planos de treino e monta os botões de modalidade.
+     * A lógica agora é: PlanoTreino é a fonte de verdade.
+     * Cada plano tem modalidade + treinadorId.
+     * Agrupamos os planos por modalidade para exibir os botões.
+     */
     async function carregarTreinadoresEModalidades() {
-      const [treinRes, modRes] = await Promise.all([
-        TreinadorAPI.listar(),
-        ModalidadeAPI.listar()
-      ]);
-      todosTreinadores = treinRes.data || [];
-      todasModalidades = modRes.data || [];
+      try {
+        // Uma única chamada para buscar todos os planos + treinadores em paralelo
+        const [planosRes, treinRes] = await Promise.all([
+          PlanoTreinoAPI.listarTodos(),
+          TreinadorAPI.listar()
+        ]);
 
-      // Popula select de modalidades
-      const sel = document.getElementById('filtro-modalidade');
-      todasModalidades.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m.id;
-        opt.textContent = m.nome;
-        sel.appendChild(opt);
-      });
+        todosTreinadores = treinRes.data || [];
+        todosPlanos      = planosRes.data || [];
 
-      renderTreinadores(todosTreinadores);
-    }
-
-    function filtrarTreinadores() {
-      const modId = document.getElementById('filtro-modalidade').value;
-      if (!modId) {
-        renderTreinadores(todosTreinadores);
-        return;
-      }
-      // Filtra treinadores que têm a modalidade selecionada
-      const filtrados = todosTreinadores.filter(t =>
-        t.modalidades && t.modalidades.some(m => String(m.id) === String(modId))
-      );
-      renderTreinadores(filtrados);
-      if (modId) {
-        modalidadeSelecionada = todasModalidades.find(m => String(m.id) === String(modId));
+        renderBotoesModalidade();
+      } catch(err) {
+        console.error('Erro ao carregar treinadores:', err);
       }
     }
 
-    function renderTreinadores(treinadores) {
+    /**
+     * Renderiza os botões de modalidade com base nos planos existentes.
+     * Todas as modalidades fixas aparecem. As que têm treinador ficam ativas.
+     */
+    function renderBotoesModalidade() {
+      const grid = document.getElementById('modalidades-btn-grid');
+
+      grid.innerHTML = MODALIDADES.map(mod => {
+        const planosDestaModalidade = todosPlanos.filter(p => p.modalidade === mod);
+        const temTreinador = planosDestaModalidade.length > 0;
+        const selecionada = modalidadeSelecionada && modalidadeSelecionada.nome === mod;
+
+        return `
+          <button
+            onclick="selecionarModalidade('${mod}')"
+            class="btn ${selecionada ? 'btn-primary' : (temTreinador ? 'btn-outline' : 'btn-outline')}"
+            style="${!temTreinador ? 'opacity:0.5;' : ''}"
+            title="${temTreinador ? planosDestaModalidade.length + ' treinador(es) disponível(is)' : 'Sem treinador disponível no momento'}"
+          >
+            ${mod}
+            ${temTreinador ? `<span style="font-size:0.7rem;margin-left:0.3rem;color:var(--brand);">●</span>` : ''}
+          </button>`;
+      }).join('');
+    }
+
+    /**
+     * Ao clicar em uma modalidade, filtra e exibe os treinadores que têm
+     * plano cadastrado para ela.
+     */
+    function selecionarModalidade(nomeModalidade) {
+      modalidadeSelecionada = { nome: nomeModalidade };
+      treinadorSelecionado = null;
+      document.getElementById('btn-confirmar-wrap').classList.add('hidden');
+
+      // Atualiza botões
+      renderBotoesModalidade();
+
+      // Filtra treinadores com plano para esta modalidade
+      const planosDestaModalidade = todosPlanos.filter(p => p.modalidade === nomeModalidade);
+      const treinadorIds = [...new Set(planosDestaModalidade.map(p => p.treinadorId))];
+      const treinadoresFiltrados = todosTreinadores.filter(t => treinadorIds.includes(t.id));
+
+      // Mostra seção de treinadores
+      const section = document.getElementById('treinadores-section');
+      section.classList.remove('hidden');
+      document.getElementById('treinadores-titulo').textContent =
+        `Treinadores disponíveis para ${nomeModalidade}`;
+
+      renderTreinadores(treinadoresFiltrados, nomeModalidade);
+
+      // Scroll até os treinadores
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function limparModalidade() {
+      modalidadeSelecionada = null;
+      treinadorSelecionado = null;
+      document.getElementById('treinadores-section').classList.add('hidden');
+      document.getElementById('btn-confirmar-wrap').classList.add('hidden');
+      renderBotoesModalidade();
+    }
+
+    function renderTreinadores(treinadores, modalidade) {
       const grid = document.getElementById('treinadores-grid');
+
       if (!treinadores.length) {
-        grid.innerHTML = `<div class="empty-state"><div class="icon">🏋️</div><p>Nenhum treinador disponível para esta modalidade.</p></div>`;
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🏋️</div>
+            <p>Nenhum treinador disponível para <strong>${modalidade}</strong> no momento.</p>
+            <p class="text-sm mt-1" style="color:var(--text-muted);">
+              Em breve será possível gerar o plano totalmente por IA quando não houver treinador disponível.
+            </p>
+          </div>`;
         return;
       }
-      grid.innerHTML = treinadores.map(t => `
-        <div class="treinador-card ${treinadorSelecionado && treinadorSelecionado.id === t.id ? 'selected' : ''}"
-             onclick="selecionarTreinador(${t.id}, '${t.nome}', this)">
-          <div class="treinador-card-avatar">${UI.initials(t.nome)}</div>
-          <div class="treinador-card-name">${t.nome}</div>
-          <div class="treinador-card-desc">${t.descricaoProfissional || 'Treinador profissional cadastrado no SportPro.'}</div>
-          <div class="treinador-card-modalidades">
-            ${(t.modalidades || []).slice(0,3).map(m =>
-              `<span class="badge badge-brand">${m.nome}</span>`
-            ).join('')}
-          </div>
-        </div>
-      `).join('');
+
+      grid.innerHTML = treinadores.map(t => {
+        // Pega os níveis que este treinador tem para esta modalidade
+        const niveis = todosPlanos
+          .filter(p => p.treinadorId === t.id && p.modalidade === modalidade)
+          .map(p => p.nivel);
+
+        const selecionado = treinadorSelecionado && treinadorSelecionado.id === t.id;
+
+        return `
+          <div class="treinador-card ${selecionado ? 'selected' : ''}"
+               onclick="selecionarTreinador(${t.id}, '${t.nome}', this)">
+            <div class="treinador-card-avatar">${UI.initials(t.nome)}</div>
+            <div class="treinador-card-name">${t.nome}</div>
+            <div class="treinador-card-desc">${t.descricaoProfissional || 'Treinador profissional cadastrado no SportPro.'}</div>
+            <div class="treinador-card-modalidades" style="margin-top:0.5rem;">
+              ${niveis.map(n => {
+                const cores = { INICIANTE: 'badge-green', INTERMEDIARIO: 'badge-yellow', AVANCADO: 'badge-red' };
+                const labels = { INICIANTE: '🟢 Iniciante', INTERMEDIARIO: '🟡 Intermediário', AVANCADO: '🔴 Avançado' };
+                return `<span class="badge ${cores[n] || 'badge-brand'}">${labels[n] || n}</span>`;
+              }).join('')}
+            </div>
+          </div>`;
+      }).join('');
     }
 
     function selecionarTreinador(id, nome, el) {
@@ -562,12 +635,9 @@
 
     async function confirmarTreinador() {
       if (!treinadorSelecionado) return;
-      // Seleciona a primeira modalidade do treinador se nenhuma foi filtrada
       if (!modalidadeSelecionada) {
-        const treinadorFull = todosTreinadores.find(t => t.id === treinadorSelecionado.id);
-        if (treinadorFull && treinadorFull.modalidades && treinadorFull.modalidades.length > 0) {
-          modalidadeSelecionada = treinadorFull.modalidades[0];
-        }
+        UI.showAlert('Selecione uma modalidade primeiro.', 'error');
+        return;
       }
       if (!modalidadeSelecionada) {
         UI.showAlert('Selecione uma modalidade antes de confirmar.', 'error');
@@ -581,7 +651,7 @@
         await AtletaAPI.atualizarPerfil({
           atletaId: USER.id,
           treinadorId: treinadorSelecionado.id,
-          modalidadeId: modalidadeSelecionada.id,
+          modalidadeNome: modalidadeSelecionada.nome,
           objetivo: document.getElementById('objetivo').value || 'A definir',
           experiencia: document.getElementById('experiencia').value || 'INICIANTE',
           diasDisponiveis: parseInt(document.getElementById('diasDisponiveis').value) || 3
@@ -608,7 +678,7 @@
         await AtletaAPI.atualizarPerfil({
           atletaId: USER.id,
           treinadorId: treinadorSelecionado.id,
-          modalidadeId: modalidadeSelecionada ? modalidadeSelecionada.id : null,
+          modalidadeNome: modalidadeSelecionada ? modalidadeSelecionada.nome : null,
           objetivo: document.getElementById('objetivo').value,
           experiencia: document.getElementById('experiencia').value,
           diasDisponiveis: parseInt(document.getElementById('diasDisponiveis').value),

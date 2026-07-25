@@ -6,99 +6,81 @@
   <title>Dashboard Treinador — SportPro</title>
   <link rel="stylesheet" href="../css/global.css">
   <style>
-    /* ---- Painel de abas ---- */
-    .tab-nav {
-      display: flex;
-      gap: 0.25rem;
-      background: var(--surface-2);
-      border-radius: var(--radius-sm);
-      padding: 4px;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-    }
-    .tab-btn {
-      padding: 0.55rem 1.1rem;
-      border-radius: 5px;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-family: var(--font-body);
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .tab-btn.active { background: var(--surface); color: var(--text-primary); }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
     /* ---- Atleta card ---- */
     .atleta-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 1.25rem 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      transition: var(--transition);
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem; transition: var(--transition);
     }
     .atleta-card:hover { border-color: rgba(200,255,0,0.25); }
     .atleta-avatar {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      background: rgba(200,255,0,0.12);
-      color: var(--brand);
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(200,255,0,0.12); color: var(--brand);
+      font-family: var(--font-display); font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     .atleta-info { flex: 1; }
     .atleta-name { font-weight: 600; font-size: 0.95rem; }
     .atleta-meta { font-size: 0.8rem; color: var(--text-muted); }
 
-    /* ---- Modalidade/Metodologia card ---- */
-    .item-list { display: flex; flex-direction: column; gap: 0.75rem; }
-    .item-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 1rem 1.25rem;
+    /* ---- Plano card (lista) ---- */
+    .plano-card {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 1.25rem 1.5rem;
+      transition: var(--transition);
     }
-    .item-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
-    .item-desc { font-size: 0.85rem; color: var(--text-muted); }
-
-    /* ---- Form inline ---- */
-    .inline-form {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .inline-form h3 { margin-bottom: 1.25rem; font-size: 1rem; }
-    .form-stack { display: flex; flex-direction: column; gap: 1rem; }
-    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-    .section-header {
+    .plano-card:hover { border-color: rgba(200,255,0,0.25); }
+    .plano-card-header {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
-    .section-header h3 { font-size: 1rem; }
+    .plano-card-title { font-weight: 700; font-size: 1rem; }
+    .plano-card-body { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+    .plano-card-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
 
+    /* ---- Formulário de plano ---- */
+    .plano-form-card {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 1.75rem; margin-bottom: 1.5rem;
+    }
+    .plano-form-card h3 { margin-bottom: 1.25rem; font-size: 1rem; }
+
+    .form-stack { display: flex; flex-direction: column; gap: 1.1rem; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+    /* Seções do formulário */
+    .form-section {
+      border-top: 1px solid var(--border);
+      padding-top: 1.25rem; margin-top: 0.5rem;
+    }
+    .form-section-title {
+      font-size: 0.78rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--brand); margin-bottom: 1rem;
+    }
+
+    /* Campos escondidos até selecionar modalidade+nível */
+    .form-fields-container { display: none; }
+    .form-fields-container.visible { display: block; }
+
+    .item-list { display: flex; flex-direction: column; gap: 0.75rem; }
     .empty-state {
       text-align: center; padding: 3rem 1rem;
       color: var(--text-muted); font-size: 0.9rem;
     }
     .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
 
-    @media (max-width: 600px) { .form-row-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) {
+      .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
   <nav class="navbar">
     <div class="navbar-brand">Sport<span>Pro</span></div>
     <div class="navbar-links">
@@ -108,147 +90,249 @@
   </nav>
 
   <div class="dashboard-layout">
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-user">
         <div class="sidebar-avatar" id="sidebar-avatar">T</div>
         <div class="sidebar-name" id="sidebar-name">Carregando...</div>
         <div class="sidebar-role">Treinador</div>
       </div>
-
       <nav class="sidebar-nav">
         <span class="sidebar-section-label">Menu</span>
-        <button class="sidebar-link active" onclick="showTab('overview', this)">
+        <button class="sidebar-link active" data-panel="overview" onclick="showTab('overview', this)">
           <span class="icon">📊</span> Visão Geral
         </button>
-        <button class="sidebar-link" onclick="showTab('atletas', this)">
+        <button class="sidebar-link" data-panel="atletas" onclick="showTab('atletas', this)">
           <span class="icon">🤸</span> Meus Atletas
         </button>
-        <button class="sidebar-link" onclick="showTab('modalidades', this)">
-          <span class="icon">🏅</span> Modalidades
-        </button>
-        <button class="sidebar-link" onclick="showTab('metodologias', this)">
-          <span class="icon">📋</span> Metodologias
+        <button class="sidebar-link" data-panel="planos" onclick="showTab('planos', this)">
+          <span class="icon">📋</span> Planos de Treino
         </button>
       </nav>
     </aside>
 
-    <!-- Main -->
     <main class="dashboard-main">
 
-      <!-- Tab: Visão Geral -->
+      <!-- ===== Tab: Visão Geral ===== -->
       <div class="tab-panel active" id="tab-overview">
         <div class="dashboard-header">
           <h2 id="greeting">Olá, Treinador!</h2>
           <p>Seu painel de gestão esportiva</p>
         </div>
 
-        <div class="stats-grid" id="stats-grid">
+        <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-value" id="stat-atletas">—</div>
             <div class="stat-label">Atletas vinculados</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value" id="stat-modalidades">—</div>
-            <div class="stat-label">Modalidades</div>
+            <div class="stat-value" id="stat-planos">—</div>
+            <div class="stat-label">Planos de treino</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value" id="stat-metodologias">—</div>
-            <div class="stat-label">Metodologias</div>
+            <div class="stat-value" id="stat-modalidades">—</div>
+            <div class="stat-label">Modalidades cobertas</div>
           </div>
         </div>
 
-        <!-- Lista rápida de atletas recentes -->
         <div class="card">
           <h3 style="margin-bottom:1rem;">Atletas recentes</h3>
           <div id="atletas-recentes">
-            <div class="empty-state">
-              <div class="icon">🤸</div>
-              <p>Nenhum atleta vinculado ainda.</p>
-            </div>
+            <div class="empty-state"><div class="icon">🤸</div><p>Nenhum atleta vinculado ainda.</p></div>
           </div>
         </div>
       </div>
 
-      <!-- Tab: Atletas -->
+      <!-- ===== Tab: Atletas ===== -->
       <div class="tab-panel" id="tab-atletas">
         <div class="dashboard-header">
           <h2>Meus Atletas</h2>
-          <p>Gerencie os atletas vinculados a você</p>
+          <p>Atletas vinculados a você</p>
         </div>
         <div id="atletas-list" class="item-list"></div>
       </div>
 
-      <!-- Tab: Modalidades -->
-      <div class="tab-panel" id="tab-modalidades">
+      <!-- ===== Tab: Planos de Treino ===== -->
+      <div class="tab-panel" id="tab-planos">
         <div class="dashboard-header">
-          <h2>Modalidades</h2>
-          <p>Cadastre as modalidades esportivas que você atende</p>
+          <h2>Planos de Treino</h2>
+          <p>Cadastre sua metodologia completa por modalidade e nível de experiência</p>
         </div>
 
         <!-- Formulário de cadastro -->
-        <div class="inline-form">
-          <h3>➕ Nova Modalidade</h3>
-          <form class="form-stack" onsubmit="handleModalidade(event)">
+        <div class="plano-form-card">
+          <h3>➕ Novo Plano de Treino</h3>
+
+          <form class="form-stack" id="form-plano" onsubmit="handlePlano(event)">
+
+            <!-- Seleção: Modalidade + Nível -->
             <div class="form-row-2">
               <div class="form-group">
-                <label class="form-label">Nome da modalidade</label>
-                <input type="text" id="mod-nome" class="form-control" placeholder="Ex: 100m rasos" required>
+                <label class="form-label">Modalidade</label>
+                <select id="plano-modalidade" class="form-control" onchange="verificarSelecao()" required>
+                  <option value="">Selecione a modalidade...</option>
+                </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Descrição</label>
-                <input type="text" id="mod-desc" class="form-control" placeholder="Breve descrição">
+                <label class="form-label">Nível de experiência</label>
+                <select id="plano-nivel" class="form-control" onchange="verificarSelecao()" required>
+                  <option value="">Selecione o nível...</option>
+                </select>
               </div>
             </div>
-            <div>
-              <button type="submit" class="btn btn-primary btn-sm" id="btn-mod">Cadastrar Modalidade</button>
-            </div>
+
+            <!-- Campos aparecem após selecionar modalidade + nível -->
+            <div class="form-fields-container" id="form-fields">
+
+              <!-- SEÇÃO: TREINO -->
+              <div class="form-section">
+                <div class="form-section-title">🏃 Informações de Treino</div>
+
+                <div class="form-stack">
+                  <div class="form-group">
+                    <label class="form-label">Descrição geral da metodologia</label>
+                    <textarea id="plano-descricao" class="form-control" rows="3"
+                      placeholder="Descreva a abordagem geral de treino para este nível e modalidade..." required></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Estrutura semanal</label>
+                    <textarea id="plano-estrutura" class="form-control" rows="3"
+                      placeholder="Como distribuir os treinos na semana? Ex: Seg: velocidade, Ter: força, Qua: regenerativo..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Tipos de treino</label>
+                    <textarea id="plano-tipos" class="form-control" rows="2"
+                      placeholder="Ex: Tiros curtos, corrida contínua, drills, pliometria..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Intensidades e zonas de treino</label>
+                    <textarea id="plano-intensidades" class="form-control" rows="2"
+                      placeholder="Ex: Z2 (60-70% FCmax) para base, Z5 (90%+) para tiros..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Exercícios de força complementares</label>
+                    <textarea id="plano-forca" class="form-control" rows="2"
+                      placeholder="Ex: Agachamento 3x12, Terra 4x6, Nórdico 3x8..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Estratégias de recuperação</label>
+                    <textarea id="plano-recuperacao" class="form-control" rows="2"
+                      placeholder="Ex: 48h entre sessões intensas, sono 8h, banho frio..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Métricas de avaliação</label>
+                    <textarea id="plano-metricas" class="form-control" rows="2"
+                      placeholder="O que medir para avaliar evolução? Ex: tempo nos 100m, 1RM, FC recuperação..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Cuidados e alertas especiais</label>
+                    <textarea id="plano-cuidados" class="form-control" rows="2"
+                      placeholder="Lesões comuns, quando parar, sinais de alerta..."></textarea>
+                  </div>
+
+                  <div class="form-row-3">
+                    <div class="form-group">
+                      <label class="form-label">Dias/semana mín.</label>
+                      <input type="number" id="plano-dias-min" class="form-control" min="1" max="7" placeholder="Ex: 3">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Dias/semana máx.</label>
+                      <input type="number" id="plano-dias-max" class="form-control" min="1" max="7" placeholder="Ex: 5">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Volume semanal (km)</label>
+                      <input type="number" id="plano-volume" class="form-control" step="0.1" placeholder="Ex: 35.0">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SEÇÃO: NUTRIÇÃO -->
+              <div class="form-section">
+                <div class="form-section-title">🥗 Plano Nutricional</div>
+
+                <div class="form-stack">
+                  <div class="form-group">
+                    <label class="form-label">Distribuição de macronutrientes</label>
+                    <textarea id="plano-macros" class="form-control" rows="2"
+                      placeholder="Ex: Carboidratos 55%, Proteína 25% (1.8g/kg), Gordura 20%..."></textarea>
+                  </div>
+
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label class="form-label">Café da manhã</label>
+                      <textarea id="plano-cafe" class="form-control" rows="2"
+                        placeholder="Sugestões de café da manhã..."></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Almoço</label>
+                      <textarea id="plano-almoco" class="form-control" rows="2"
+                        placeholder="Sugestões de almoço..."></textarea>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Jantar</label>
+                    <textarea id="plano-jantar" class="form-control" rows="2"
+                      placeholder="Sugestões de jantar..."></textarea>
+                  </div>
+
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label class="form-label">Pré-treino</label>
+                      <textarea id="plano-pre" class="form-control" rows="2"
+                        placeholder="O que comer antes do treino, timing..."></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Pós-treino</label>
+                      <textarea id="plano-pos" class="form-control" rows="2"
+                        placeholder="O que comer após o treino, janela anabólica..."></textarea>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Durante treinos longos (>60 min)</label>
+                    <textarea id="plano-durante" class="form-control" rows="2"
+                      placeholder="Estratégia de géis, isotônico, timing..."></textarea>
+                  </div>
+
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label class="form-label">Hidratação</label>
+                      <textarea id="plano-hidratacao" class="form-control" rows="2"
+                        placeholder="Ex: 35ml/kg/dia, 150ml a cada 15 min no treino..."></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Suplementação base</label>
+                      <textarea id="plano-suplementacao" class="form-control" rows="2"
+                        placeholder="Ex: Whey 25g pós-treino, Creatina 5g/dia..."></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botão salvar -->
+              <div style="margin-top:1.5rem;">
+                <button type="submit" class="btn btn-primary" id="btn-plano">
+                  💾 Salvar Plano de Treino
+                </button>
+              </div>
+
+            </div><!-- /form-fields-container -->
           </form>
         </div>
 
-        <div class="section-header">
-          <h3>Suas modalidades</h3>
+        <!-- Lista de planos cadastrados -->
+        <div>
+          <h3 style="margin-bottom:1rem;font-size:1rem;">Planos cadastrados</h3>
+          <div id="planos-list" class="item-list"></div>
         </div>
-        <div id="modalidades-list" class="item-list"></div>
-      </div>
-
-      <!-- Tab: Metodologias -->
-      <div class="tab-panel" id="tab-metodologias">
-        <div class="dashboard-header">
-          <h2>Metodologias de Treino</h2>
-          <p>Defina estratégias e critérios de evolução</p>
-        </div>
-
-        <div class="inline-form">
-          <h3>➕ Nova Metodologia</h3>
-          <form class="form-stack" onsubmit="handleMetodologia(event)">
-            <div class="form-group">
-              <label class="form-label">Título</label>
-              <input type="text" id="met-titulo" class="form-control" placeholder="Ex: Método Periodização Linear" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Descrição geral</label>
-              <textarea id="met-desc" class="form-control" placeholder="Descreva a metodologia..." required></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Estratégias de treino</label>
-              <textarea id="met-estrategias" class="form-control" placeholder="Quais estratégias são utilizadas?"></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Recomendações alimentares</label>
-              <textarea id="met-alimentar" class="form-control" placeholder="Orientações nutricionais gerais..."></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Critérios de evolução</label>
-              <textarea id="met-criterios" class="form-control" placeholder="Como medir a evolução do atleta?"></textarea>
-            </div>
-            <div>
-              <button type="submit" class="btn btn-primary btn-sm" id="btn-met">Cadastrar Metodologia</button>
-            </div>
-          </form>
-        </div>
-
-        <div id="metodologias-list" class="item-list"></div>
       </div>
 
     </main>
@@ -256,58 +340,92 @@
 
   <script src="../js/api.js"></script>
   <script>
-    // ---- Inicialização ----
     let USER = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       USER = Session.requireAuth('TREINADOR');
       if (!USER) return;
 
-      // Preenche sidebar e navbar
       document.getElementById('nav-nome').textContent = USER.nome;
       document.getElementById('sidebar-name').textContent = USER.nome;
       document.getElementById('sidebar-avatar').textContent = UI.initials(USER.nome);
       document.getElementById('greeting').textContent = `Olá, ${USER.nome.split(' ')[0]}!`;
 
+      // Popula dropdowns fixos
+      popularDropdowns();
+
       await carregarDados();
     });
+
+    // ---- Popula selects de modalidade e nível com valores fixos ----
+    function popularDropdowns() {
+      const selMod = document.getElementById('plano-modalidade');
+      MODALIDADES.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        selMod.appendChild(opt);
+      });
+
+      const selNivel = document.getElementById('plano-nivel');
+      NIVEIS.forEach(n => {
+        const opt = document.createElement('option');
+        opt.value = n.value;
+        opt.textContent = n.label;
+        selNivel.appendChild(opt);
+      });
+    }
+
+    // ---- Mostra os campos do formulário somente após selecionar modalidade + nível ----
+    function verificarSelecao() {
+      const mod = document.getElementById('plano-modalidade').value;
+      const nivel = document.getElementById('plano-nivel').value;
+      const container = document.getElementById('form-fields');
+
+      if (mod && nivel) {
+        container.classList.add('visible');
+      } else {
+        container.classList.remove('visible');
+      }
+    }
 
     // ---- Carrega todos os dados do treinador ----
     async function carregarDados() {
       try {
-        const [atletasRes, modalidadesRes, metodologiasRes] = await Promise.all([
+        const [atletasRes, planosRes] = await Promise.all([
           AtletaAPI.listarPorTreinador(USER.id),
-          ModalidadeAPI.listarPorTreinador(USER.id),
-          MetodologiaAPI.listarPorTreinador(USER.id)
+          PlanoTreinoAPI.listarPorTreinador(USER.id)
         ]);
 
-        const atletas = atletasRes.data || [];
-        const modalidades = modalidadesRes.data || [];
-        const metodologias = metodologiasRes.data || [];
+        const atletas  = atletasRes.data  || [];
+        const planos   = planosRes.data   || [];
 
         // Stats
         document.getElementById('stat-atletas').textContent = atletas.length;
-        document.getElementById('stat-modalidades').textContent = modalidades.length;
-        document.getElementById('stat-metodologias').textContent = metodologias.length;
+        document.getElementById('stat-planos').textContent  = planos.length;
+
+        // Modalidades únicas cobertas
+        const modalidadesUnicas = [...new Set(planos.map(p => p.modalidade))];
+        document.getElementById('stat-modalidades').textContent = modalidadesUnicas.length;
 
         renderAtletas(atletas);
-        renderModalidades(modalidades);
-        renderMetodologias(metodologias);
+        renderPlanos(planos);
 
       } catch (err) {
         console.error('Erro ao carregar dados:', err);
+        UI.showAlert('Erro ao carregar dados: ' + err.message, 'error');
       }
     }
 
     // ---- Renderiza atletas ----
     function renderAtletas(atletas) {
-      const listEl = document.getElementById('atletas-list');
-      const recentEl = document.getElementById('atletas-recentes');
+      const listEl    = document.getElementById('atletas-list');
+      const recentEl  = document.getElementById('atletas-recentes');
 
       if (!atletas.length) {
-        const emptyHtml = `<div class="empty-state"><div class="icon">🤸</div><p>Nenhum atleta ainda. Compartilhe seu perfil para receber atletas.</p></div>`;
-        listEl.innerHTML = emptyHtml;
-        recentEl.innerHTML = emptyHtml;
+        const html = `<div class="empty-state"><div class="icon">🤸</div><p>Nenhum atleta vinculado ainda.</p></div>`;
+        listEl.innerHTML = html;
+        recentEl.innerHTML = html;
         return;
       }
 
@@ -318,8 +436,8 @@
             <div class="atleta-name">${a.nome}</div>
             <div class="atleta-meta">
               ${a.modalidadeNome || 'Sem modalidade'} ·
-              ${a.experiencia || 'Perfil incompleto'} ·
-              ${a.objetivo ? a.objetivo.substring(0,40) + '...' : 'Sem objetivo definido'}
+              ${a.experiencia   || 'Perfil incompleto'} ·
+              ${a.objetivo ? a.objetivo.substring(0,50) + '...' : 'Sem objetivo'}
             </div>
           </div>
           <span class="badge ${a.treinadorId ? 'badge-green' : 'badge-yellow'}">
@@ -328,7 +446,7 @@
         </div>
       `).join('');
 
-      listEl.innerHTML = html;
+      listEl.innerHTML   = html;
       recentEl.innerHTML = atletas.slice(0,3).map(a => `
         <div class="atleta-card">
           <div class="atleta-avatar">${UI.initials(a.nome)}</div>
@@ -340,52 +458,77 @@
       `).join('');
     }
 
-    // ---- Renderiza modalidades ----
-    function renderModalidades(modalidades) {
-      const el = document.getElementById('modalidades-list');
-      if (!modalidades.length) {
-        el.innerHTML = `<div class="empty-state"><div class="icon">🏅</div><p>Nenhuma modalidade cadastrada.</p></div>`;
+    // ---- Renderiza lista de planos cadastrados ----
+    function renderPlanos(planos) {
+      const el = document.getElementById('planos-list');
+
+      if (!planos.length) {
+        el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Nenhum plano cadastrado ainda.</p></div>`;
         return;
       }
-      el.innerHTML = modalidades.map(m => `
-        <div class="item-card">
-          <div class="item-title">${m.nome}</div>
-          <div class="item-desc">${m.descricao || 'Sem descrição'}</div>
+
+      el.innerHTML = planos.map(p => `
+        <div class="plano-card">
+          <div class="plano-card-header">
+            <div>
+              <div class="plano-card-title">${p.modalidade}</div>
+              <div style="margin-top:0.2rem;">
+                <span class="badge ${nivelBadge(p.nivel)}">${nivelLabel(p.nivel)}</span>
+              </div>
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-muted);">
+              ${UI.formatDate(p.criadoEm)}
+            </div>
+          </div>
+          <div class="plano-card-body">
+            ${p.descricaoGeral ? p.descricaoGeral.substring(0, 160) + '...' : '—'}
+          </div>
+          <div class="plano-card-actions">
+            <button onclick="editarPlano(${p.id})" class="btn btn-outline btn-sm">✏️ Editar</button>
+            <button onclick="excluirPlano(${p.id})" class="btn btn-danger btn-sm">🗑️ Excluir</button>
+          </div>
         </div>
       `).join('');
     }
 
-    // ---- Renderiza metodologias ----
-    function renderMetodologias(metodologias) {
-      const el = document.getElementById('metodologias-list');
-      if (!metodologias.length) {
-        el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Nenhuma metodologia cadastrada.</p></div>`;
-        return;
-      }
-      el.innerHTML = metodologias.map(m => `
-        <div class="item-card">
-          <div class="item-title">${m.titulo}</div>
-          <div class="item-desc">${m.descricao}</div>
-          ${m.estrategias ? `<div class="item-desc mt-1"><strong style="color:var(--brand)">Estratégias:</strong> ${m.estrategias.substring(0,100)}...</div>` : ''}
-          <div class="item-desc mt-1" style="font-size:0.75rem;color:var(--text-muted)">Cadastrada em ${UI.formatDate(m.criadoEm)}</div>
-        </div>
-      `).join('');
-    }
-
-    // ---- Cadastrar modalidade ----
-    async function handleModalidade(e) {
+    // ---- Salvar plano ----
+    async function handlePlano(e) {
       e.preventDefault();
-      const btn = document.getElementById('btn-mod');
+      const btn = document.getElementById('btn-plano');
       UI.setLoading(btn, true);
+
+      const payload = {
+        treinadorId:        USER.id,
+        modalidade:         document.getElementById('plano-modalidade').value,
+        nivel:              document.getElementById('plano-nivel').value,
+        descricaoGeral:     document.getElementById('plano-descricao').value,
+        estruturaSemana:    document.getElementById('plano-estrutura').value,
+        tiposTreino:        document.getElementById('plano-tipos').value,
+        intensidades:       document.getElementById('plano-intensidades').value,
+        exerciciosForca:    document.getElementById('plano-forca').value,
+        recuperacao:        document.getElementById('plano-recuperacao').value,
+        metricasAvaliacao:  document.getElementById('plano-metricas').value,
+        cuidadosEspeciais:  document.getElementById('plano-cuidados').value,
+        diasSemanaMin:      parseInt(document.getElementById('plano-dias-min').value) || null,
+        diasSemanaMax:      parseInt(document.getElementById('plano-dias-max').value) || null,
+        volumeSemanalKm:    parseFloat(document.getElementById('plano-volume').value) || null,
+        distribuicaoMacros: document.getElementById('plano-macros').value,
+        cafeDaManha:        document.getElementById('plano-cafe').value,
+        almoco:             document.getElementById('plano-almoco').value,
+        jantar:             document.getElementById('plano-jantar').value,
+        preTreino:          document.getElementById('plano-pre').value,
+        posTreino:          document.getElementById('plano-pos').value,
+        duranteTreinoLongo: document.getElementById('plano-durante').value,
+        hidratacao:         document.getElementById('plano-hidratacao').value,
+        suplementacaoBase:  document.getElementById('plano-suplementacao').value
+      };
+
       try {
-        await ModalidadeAPI.cadastrar({
-          nome: document.getElementById('mod-nome').value,
-          descricao: document.getElementById('mod-desc').value,
-          treinadorId: USER.id
-        });
-        e.target.reset();
+        await PlanoTreinoAPI.salvar(payload);
+        document.getElementById('form-plano').reset();
+        document.getElementById('form-fields').classList.remove('visible');
         await carregarDados();
-        UI.showAlert('Modalidade cadastrada!', 'success');
+        UI.showAlert('Plano de treino salvo com sucesso!', 'success');
       } catch (err) {
         UI.showAlert(err.message, 'error');
       } finally {
@@ -393,35 +536,77 @@
       }
     }
 
-    // ---- Cadastrar metodologia ----
-    async function handleMetodologia(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btn-met');
-      UI.setLoading(btn, true);
+    // ---- Editar plano — carrega os dados no formulário ----
+    async function editarPlano(id) {
       try {
-        await MetodologiaAPI.cadastrar({
-          titulo: document.getElementById('met-titulo').value,
-          descricao: document.getElementById('met-desc').value,
-          estrategias: document.getElementById('met-estrategias').value,
-          recomendacoesAlimentares: document.getElementById('met-alimentar').value,
-          criteriosEvolucao: document.getElementById('met-criterios').value,
-          treinadorId: USER.id
-        });
-        e.target.reset();
-        await carregarDados();
-        UI.showAlert('Metodologia cadastrada!', 'success');
+        const res  = await PlanoTreinoAPI.buscarPorId(id);
+        const p    = res.data;
+
+        // Scroll até o formulário
+        document.getElementById('form-plano').scrollIntoView({ behavior: 'smooth' });
+
+        // Preenche os selects
+        document.getElementById('plano-modalidade').value = p.modalidade;
+        document.getElementById('plano-nivel').value      = p.nivel;
+        verificarSelecao();
+
+        // Preenche campos de treino
+        document.getElementById('plano-descricao').value    = p.descricaoGeral         || '';
+        document.getElementById('plano-estrutura').value    = p.estruturaSemana         || '';
+        document.getElementById('plano-tipos').value        = p.tiposTreino             || '';
+        document.getElementById('plano-intensidades').value = p.intensidades            || '';
+        document.getElementById('plano-forca').value        = p.exerciciosForca         || '';
+        document.getElementById('plano-recuperacao').value  = p.recuperacao             || '';
+        document.getElementById('plano-metricas').value     = p.metricasAvaliacao       || '';
+        document.getElementById('plano-cuidados').value     = p.cuidadosEspeciais       || '';
+        document.getElementById('plano-dias-min').value     = p.diasSemanaMin           || '';
+        document.getElementById('plano-dias-max').value     = p.diasSemanaMax           || '';
+        document.getElementById('plano-volume').value       = p.volumeSemanalKm         || '';
+
+        // Preenche campos de nutrição
+        document.getElementById('plano-macros').value       = p.distribuicaoMacros      || '';
+        document.getElementById('plano-cafe').value         = p.cafeDaManha             || '';
+        document.getElementById('plano-almoco').value       = p.almoco                  || '';
+        document.getElementById('plano-jantar').value       = p.jantar                  || '';
+        document.getElementById('plano-pre').value          = p.preTreino               || '';
+        document.getElementById('plano-pos').value          = p.posTreino               || '';
+        document.getElementById('plano-durante').value      = p.duranteTreinoLongo      || '';
+        document.getElementById('plano-hidratacao').value   = p.hidratacao              || '';
+        document.getElementById('plano-suplementacao').value= p.suplementacaoBase       || '';
+
+        UI.showAlert('Plano carregado para edição. Faça as alterações e salve.', 'success');
       } catch (err) {
-        UI.showAlert(err.message, 'error');
-      } finally {
-        UI.setLoading(btn, false);
+        UI.showAlert('Erro ao carregar plano: ' + err.message, 'error');
       }
     }
 
-    // ---- Navegação por abas ----
+    // ---- Excluir plano ----
+    async function excluirPlano(id) {
+      if (!confirm('Deseja excluir este plano de treino?')) return;
+      try {
+        await PlanoTreinoAPI.excluir(id);
+        await carregarDados();
+        UI.showAlert('Plano excluído.', 'success');
+      } catch (err) {
+        UI.showAlert(err.message, 'error');
+      }
+    }
+
+    // ---- Helpers de nível ----
+    function nivelLabel(nivel) {
+      const map = { INICIANTE: '🟢 Iniciante', INTERMEDIARIO: '🟡 Intermediário', AVANCADO: '🔴 Avançado' };
+      return map[nivel] || nivel;
+    }
+    function nivelBadge(nivel) {
+      const map = { INICIANTE: 'badge-green', INTERMEDIARIO: 'badge-yellow', AVANCADO: 'badge-red' };
+      return map[nivel] || 'badge-brand';
+    }
+
+    // ---- Navegação ----
     function showTab(tab, btn) {
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-      document.getElementById(`tab-${tab}`).classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
       btn.classList.add('active');
     }
 

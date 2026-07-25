@@ -4,8 +4,11 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 /**
- * PerfilEsportivoRequest — DTO de entrada para RF007 (envio do perfil esportivo do atleta).
- * Esses dados são enviados ao webhook n8n para gerar o cronograma personalizado.
+ * PerfilEsportivoRequest — DTO de entrada para RF007.
+ *
+ * Atualizado: modalidade agora é recebida como NOME (string fixa)
+ * ao invés de modalidadeId (Long), pois as modalidades são
+ * definidas por dropdown fixo no frontend e não precisam de FK.
  */
 @Data
 public class PerfilEsportivoRequest {
@@ -16,13 +19,14 @@ public class PerfilEsportivoRequest {
     @NotNull(message = "ID do treinador é obrigatório")
     private Long treinadorId;
 
-    @NotNull(message = "ID da modalidade é obrigatório")
-    private Long modalidadeId;
+    /** Nome da modalidade — valor fixo do dropdown: "100m rasos", "Maratona" etc. */
+    @NotBlank(message = "Modalidade é obrigatória")
+    private String modalidadeNome;
 
     @NotBlank(message = "Objetivo é obrigatório")
     private String objetivo;
 
-    /** INICIANTE, INTERMEDIARIO, AVANCADO */
+    /** INICIANTE | INTERMEDIARIO | AVANCADO */
     @NotBlank(message = "Experiência é obrigatória")
     private String experiencia;
 

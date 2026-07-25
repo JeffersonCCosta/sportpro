@@ -14,5 +14,5 @@ public interface AtletaRepository extends JpaRepository<Atleta, Long> {
     Optional<Atleta> findByEmail(String email);
     boolean existsByEmail(String email);
     List<Atleta> findByTreinadorId(Long treinadorId);
-    List<Atleta> findByModalidadeId(Long modalidadeId);
+    List<Atleta> findByModalidadeNome(String modalidadeNome);
 }

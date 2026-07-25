@@ -16,6 +16,5 @@ public class AtletaResponseDto {
     private LocalDateTime criadoEm;
     private Long treinadorId;
     private String treinadorNome;
-    private Long modalidadeId;
     private String modalidadeNome;
 }
