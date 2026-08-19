@@ -16,12 +16,26 @@ import java.util.stream.Collectors;
 /**
  * CronogramaService — Orquestra a geração de cronogramas personalizados.
  *
- * Fluxo (RF008):
- * 1. Recebe atletaId
- * 2. Carrega atleta, treinador e PlanoTreino (modalidade + nível do atleta)
- * 3. Monta payload rico para o n8n
- * 4. Envia ao n8n via N8nWebhookIntegration
- * 5. Persiste o cronograma retornado
+ * Payload enviado ao n8n (limpo e direto):
+ * {
+ *   "atletaId":        2,
+ *   "nome":            "Nome Atleta Teste",
+ *   "idade":           31,
+ *   "peso":            82.0,
+ *   "altura":          1.82,
+ *   "imc":             24.76,
+ *   "modalidade":      "Meia-maratona",
+ *   "nivel":           "INTERMEDIARIO",
+ *   "diasDisponiveis": 5,
+ *   "objetivo":        "...",
+ *   "limitacoesFisicas": "...",
+ *   "observacoes":     "...",
+ *   "treinadorId":     4,
+ *   "treinadorNome":   "Treinador 2 Teste"
+ * }
+ *
+ * O n8n usa modalidade + nivel para buscar na base de conhecimento
+ * do Supabase e gerar o cronograma via IA.
  */
 @Service
 @RequiredArgsConstructor
@@ -30,7 +44,6 @@ public class CronogramaService {
 
     private final CronogramaRepository cronogramaRepository;
     private final AtletaRepository atletaRepository;
-    private final PlanoTreinoRepository planoTreinoRepository;
     private final N8nWebhookIntegration n8nIntegration;
 
     @Transactional
@@ -38,35 +51,24 @@ public class CronogramaService {
         log.info("Iniciando geração de cronograma para atleta ID: {}", atletaId);
 
         Atleta atleta = atletaRepository.findById(atletaId)
-                .orElseThrow(() -> new ResourceNotFoundException("Atleta não encontrado: ID " + atletaId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Atleta não encontrado: ID " + atletaId));
 
         if (atleta.getTreinador() == null) {
-            throw new ResourceNotFoundException("Atleta não possui treinador vinculado. Complete o perfil esportivo.");
+            throw new ResourceNotFoundException(
+                    "Atleta não possui treinador vinculado. Complete o perfil esportivo.");
         }
 
         if (atleta.getExperiencia() == null || atleta.getModalidadeNome() == null) {
-            throw new ResourceNotFoundException("Complete o perfil esportivo com modalidade e nível de experiência.");
+            throw new ResourceNotFoundException(
+                    "Complete o perfil esportivo com modalidade e nível de experiência.");
         }
 
-        // Busca o PlanoTreino do treinador para a modalidade e nível do atleta
-        Optional<PlanoTreino> planoOpt = planoTreinoRepository
-                .findByTreinadorIdAndModalidadeAndNivel(
-                        atleta.getTreinador().getId(),
-                        atleta.getModalidadeNome(),
-                        atleta.getExperiencia());
-
-        PlanoTreino plano = planoOpt.orElse(null);
-
-        if (plano == null) {
-            log.warn("Treinador {} não possui plano para {} / {}. Usando fallback simulado.",
-                    atleta.getTreinador().getNome(),
-                    atleta.getModalidadeNome(),
-                    atleta.getExperiencia());
-        }
-
-        Map<String, Object> payload = montarPayload(atleta, plano);
+        // Monta payload limpo e envia ao n8n
+        Map<String, Object> payload = montarPayload(atleta);
         Map<String, Object> resultado = n8nIntegration.enviarParaN8n(payload);
 
+        // Persiste o cronograma retornado pelo n8n
         Cronograma cronograma = Cronograma.builder()
                 .atleta(atleta)
                 .treinoSemanal(String.valueOf(resultado.getOrDefault("treinoSemanal", "")))
@@ -87,59 +89,41 @@ public class CronogramaService {
                 .stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    private Map<String, Object> montarPayload(Atleta atleta, PlanoTreino plano) {
-
-        Map<String, Object> dadosAtleta = new LinkedHashMap<>();
-        dadosAtleta.put("id", atleta.getId());
-        dadosAtleta.put("nome", atleta.getNome());
-        dadosAtleta.put("idade", atleta.getIdade());
-        dadosAtleta.put("peso", atleta.getPeso());
-        dadosAtleta.put("altura", atleta.getAltura());
-        dadosAtleta.put("objetivo", atleta.getObjetivo());
-        dadosAtleta.put("experiencia", atleta.getExperiencia());
-        dadosAtleta.put("diasDisponiveis", atleta.getDiasDisponiveis());
-        dadosAtleta.put("limitacoesFisicas", atleta.getLimitacoesFisicas());
-        dadosAtleta.put("observacoes", atleta.getObservacoes());
-        dadosAtleta.put("imc", calcularImc(atleta.getPeso(), atleta.getAltura()));
-
-        Map<String, Object> dadosTreinador = new LinkedHashMap<>();
-        dadosTreinador.put("id", atleta.getTreinador().getId());
-        dadosTreinador.put("nome", atleta.getTreinador().getNome());
-
-        Map<String, Object> dadosModalidade = new LinkedHashMap<>();
-        if (atleta.getModalidadeNome() != null) {
-            dadosModalidade.put("nome", atleta.getModalidadeNome());
-        }
-
-        Map<String, Object> dadosPlano = new LinkedHashMap<>();
-        if (plano != null) {
-            dadosPlano.put("descricaoGeral", plano.getDescricaoGeral());
-            dadosPlano.put("estruturaSemana", plano.getEstruturaSemana());
-            dadosPlano.put("tiposTreino", plano.getTiposTreino());
-            dadosPlano.put("intensidades", plano.getIntensidades());
-            dadosPlano.put("exerciciosForca", plano.getExerciciosForca());
-            dadosPlano.put("recuperacao", plano.getRecuperacao());
-            dadosPlano.put("metricasAvaliacao", plano.getMetricasAvaliacao());
-            dadosPlano.put("cuidadosEspeciais", plano.getCuidadosEspeciais());
-            dadosPlano.put("diasSemanaMin", plano.getDiasSemanaMin());
-            dadosPlano.put("diasSemanaMax", plano.getDiasSemanaMax());
-            dadosPlano.put("volumeSemanalKm", plano.getVolumeSemanalKm());
-            dadosPlano.put("distribuicaoMacros", plano.getDistribuicaoMacros());
-            dadosPlano.put("cafeDaManha", plano.getCafeDaManha());
-            dadosPlano.put("almoco", plano.getAlmoco());
-            dadosPlano.put("jantar", plano.getJantar());
-            dadosPlano.put("preTreino", plano.getPreTreino());
-            dadosPlano.put("posTreino", plano.getPosTreino());
-            dadosPlano.put("duranteTreinoLongo", plano.getDuranteTreinoLongo());
-            dadosPlano.put("hidratacao", plano.getHidratacao());
-            dadosPlano.put("suplementacaoBase", plano.getSuplementacaoBase());
-        }
-
+    /**
+     * Payload limpo enviado ao n8n.
+     *
+     * Apenas os dados do atleta necessários para:
+     *  - Buscar na base de conhecimento: modalidade + nivel
+     *  - Personalizar o cronograma: objetivo, limitações, dias disponíveis
+     *
+     * O planoTreino NÃO é enviado — o n8n busca direto do Supabase.
+     */
+    private Map<String, Object> montarPayload(Atleta atleta) {
         Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("atleta", dadosAtleta);
-        payload.put("treinador", dadosTreinador);
-        payload.put("modalidade", dadosModalidade);
-        payload.put("planoTreino", dadosPlano);
+
+        // Identificação
+        payload.put("atletaId",           atleta.getId());
+        payload.put("nome",               atleta.getNome());
+
+        // Dados físicos
+        payload.put("idade",              atleta.getIdade());
+        payload.put("peso",               atleta.getPeso());
+        payload.put("altura",             atleta.getAltura());
+        payload.put("imc",                calcularImc(atleta.getPeso(), atleta.getAltura()));
+
+        // Chaves para busca na base de conhecimento do Supabase
+        payload.put("modalidade",         atleta.getModalidadeNome());
+        payload.put("nivel",              atleta.getExperiencia());
+        payload.put("diasDisponiveis",    atleta.getDiasDisponiveis());
+
+        // Personalização da IA
+        payload.put("objetivo",           atleta.getObjetivo());
+        payload.put("limitacoesFisicas",  atleta.getLimitacoesFisicas());
+        payload.put("observacoes",        atleta.getObservacoes());
+
+        // Treinador
+        payload.put("treinadorId",        atleta.getTreinador().getId());
+        payload.put("treinadorNome",      atleta.getTreinador().getNome());
 
         return payload;
     }

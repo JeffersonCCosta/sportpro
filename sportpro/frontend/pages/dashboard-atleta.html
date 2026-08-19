@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,17 +16,22 @@
       overflow-x: auto;
       padding-bottom: 4px;
     }
+
     .step {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       white-space: nowrap;
     }
+
     .step-circle {
-      width: 32px; height: 32px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       border: 2px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 0.82rem;
       font-weight: 700;
       color: var(--text-muted);
@@ -33,15 +39,47 @@
       transition: var(--transition);
       flex-shrink: 0;
     }
-    .step.done .step-circle { background: var(--brand); border-color: var(--brand); color: var(--dark); }
-    .step.active .step-circle { border-color: var(--brand); color: var(--brand); }
-    .step-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
-    .step.active .step-label, .step.done .step-label { color: var(--text-primary); }
-    .step-line { height: 2px; width: 40px; background: var(--border); flex-shrink: 0; }
-    .step-line.done { background: var(--brand); }
+
+    .step.done .step-circle {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: var(--dark);
+    }
+
+    .step.active .step-circle {
+      border-color: var(--brand);
+      color: var(--brand);
+    }
+
+    .step-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .step.active .step-label,
+    .step.done .step-label {
+      color: var(--text-primary);
+    }
+
+    .step-line {
+      height: 2px;
+      width: 40px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .step-line.done {
+      background: var(--brand);
+    }
 
     /* ---- Cards de treinador ---- */
-    .treinador-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    .treinador-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
     .treinador-card {
       background: var(--surface-2);
       border: 2px solid var(--border);
@@ -50,24 +88,55 @@
       cursor: pointer;
       transition: var(--transition);
     }
-    .treinador-card:hover { border-color: rgba(200,255,0,0.4); }
-    .treinador-card.selected { border-color: var(--brand); box-shadow: var(--shadow-glow); }
+
+    .treinador-card:hover {
+      border-color: rgba(200, 255, 0, 0.4);
+    }
+
+    .treinador-card.selected {
+      border-color: var(--brand);
+      box-shadow: var(--shadow-glow);
+    }
+
     .treinador-card-avatar {
-      width: 52px; height: 52px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
-      background: rgba(200,255,0,0.1);
+      background: rgba(200, 255, 0, 0.1);
       color: var(--brand);
       font-family: var(--font-display);
       font-size: 1.4rem;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: 1rem;
     }
-    .treinador-card-name { font-weight: 700; margin-bottom: 0.25rem; }
-    .treinador-card-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
-    .treinador-card-modalidades { margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+    .treinador-card-name {
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .treinador-card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .treinador-card-modalidades {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
 
     /* ---- Cronograma ---- */
-    .cronograma-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+    .cronograma-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
     .cronograma-tab {
       padding: 0.4rem 1rem;
       border-radius: var(--radius-sm);
@@ -80,44 +149,90 @@
       cursor: pointer;
       transition: var(--transition);
     }
-    .cronograma-tab.active { border-color: var(--brand); color: var(--brand); background: rgba(200,255,0,0.07); }
 
-    .cronograma-panel { display: none; }
-    .cronograma-panel.active { display: block; }
+    .cronograma-tab.active {
+      border-color: var(--brand);
+      color: var(--brand);
+      background: rgba(200, 255, 0, 0.07);
+    }
+
+    .cronograma-panel {
+      display: none;
+    }
+
+    .cronograma-panel.active {
+      display: block;
+    }
 
     .panel-content {
       display: none;
     }
+
     .panel-content.active {
       display: block;
       animation: fadeIn 0.3s ease;
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-    .form-stack { display: flex; flex-direction: column; gap: 1.25rem; }
-    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
 
     .generate-btn-wrap {
-      background: linear-gradient(135deg, rgba(200,255,0,0.08) 0%, transparent 60%);
-      border: 1px solid rgba(200,255,0,0.2);
+      background: linear-gradient(135deg, rgba(200, 255, 0, 0.08) 0%, transparent 60%);
+      border: 1px solid rgba(200, 255, 0, 0.2);
       border-radius: var(--radius-md);
       padding: 2rem;
       text-align: center;
     }
-    .generate-btn-wrap p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem; }
 
-    .cronograma-section { margin-bottom: 1.5rem; }
+    .generate-btn-wrap p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .cronograma-section {
+      margin-bottom: 1.5rem;
+    }
+
     .cronograma-section-title {
       font-family: var(--font-display);
       font-size: 1.1rem;
       color: var(--brand);
       margin-bottom: 0.75rem;
-      display: flex; align-items: center; gap: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    @media (max-width: 600px) { .form-row-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) {
+      .form-row-2 {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
+
 <body>
 
   <nav class="navbar">
@@ -140,7 +255,8 @@
         <button class="sidebar-link active" onclick="showPanel('visao-geral', this)" data-panel="visao-geral">
           <span class="icon">📊</span> Visão Geral
         </button>
-        <button class="sidebar-link" onclick="showPanel('selecionar-treinador', this)" data-panel="selecionar-treinador">
+        <button class="sidebar-link" onclick="showPanel('selecionar-treinador', this)"
+          data-panel="selecionar-treinador">
           <span class="icon">🏋️</span> Selecionar Treinador
         </button>
         <button class="sidebar-link" onclick="showPanel('perfil-esportivo', this)" data-panel="perfil-esportivo">
@@ -218,7 +334,8 @@
         <!-- Passo 1: escolha a modalidade -->
         <div class="card mb-3">
           <label class="form-label">Modalidade esportiva</label>
-          <div id="modalidades-btn-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.75rem;margin-top:0.75rem;">
+          <div id="modalidades-btn-grid"
+            style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.75rem;margin-top:0.75rem;">
             <!-- botões gerados via JS -->
           </div>
         </div>
@@ -250,7 +367,9 @@
           <form class="form-stack" onsubmit="handlePerfil(event)">
             <div class="form-group">
               <label class="form-label">Objetivo esportivo</label>
-              <textarea id="objetivo" class="form-control" placeholder="Ex: Melhorar meu tempo nos 100m rasos, emagrecer 5kg, completar minha primeira corrida de rua..." rows="3" required></textarea>
+              <textarea id="objetivo" class="form-control"
+                placeholder="Ex: Melhorar meu tempo nos 100m rasos, emagrecer 5kg, completar minha primeira corrida de rua..."
+                rows="3" required></textarea>
             </div>
 
             <div class="form-row-2">
@@ -280,12 +399,15 @@
 
             <div class="form-group">
               <label class="form-label">Limitações físicas ou lesões</label>
-              <textarea id="limitacoes" class="form-control" placeholder="Ex: Dor no joelho esquerdo, hérnia de disco... ou deixe em branco se não houver." rows="2"></textarea>
+              <textarea id="limitacoes" class="form-control"
+                placeholder="Ex: Dor no joelho esquerdo, hérnia de disco... ou deixe em branco se não houver."
+                rows="2"></textarea>
             </div>
 
             <div class="form-group">
               <label class="form-label">Observações adicionais</label>
-              <textarea id="observacoes" class="form-control" placeholder="Qualquer informação relevante para o seu treinador..." rows="2"></textarea>
+              <textarea id="observacoes" class="form-control"
+                placeholder="Qualquer informação relevante para o seu treinador..." rows="2"></textarea>
             </div>
 
             <div>
@@ -306,9 +428,36 @@
 
         <div class="generate-btn-wrap mb-3" id="gerar-cronograma-wrap">
           <p>Gere seu cronograma personalizado com base no seu perfil esportivo.<br>
-          O sistema processará seus dados e criará um plano sob medida.</p>
+            O sistema processará seus dados e criará um plano sob medida.</p>
           <button onclick="gerarCronograma()" class="btn btn-primary" id="btn-gerar">
             ⚡ Gerar Cronograma Personalizado
+          </button>
+        </div>
+
+        <div id="cronograma-gerado-banner" class="hidden mb-3" style="
+          background: linear-gradient(135deg, rgba(200,255,0,0.08) 0%, transparent 60%);
+          border: 1px solid rgba(200,255,0,0.25);
+          border-radius: var(--radius-md);
+          padding: 1.5rem 2rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 1rem;
+        ">
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="font-size:2rem;">✅</div>
+            <div>
+              <div style="font-family:var(--font-display);font-size:1.3rem;color:var(--brand);letter-spacing:0.05em;">
+                Cronograma Gerado
+              </div>
+              <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.2rem;" id="banner-data">
+                Gerado agora com IA personalizada para seu perfil
+              </div>
+            </div>
+          </div>
+          <button onclick="gerarNovoCronograma()" class="btn btn-primary btn-sm" id="btn-gerar-novo">
+            ⚡ Gerar novo cronograma
           </button>
         </div>
 
@@ -426,10 +575,10 @@
 
     function atualizarStepper(atleta, totalCronogramas) {
       // Limpa todas as classes antes de reaplicar — evita estado residual entre recargas
-      [1,2,3,4].forEach(n => {
+      [1, 2, 3, 4].forEach(n => {
         document.getElementById('step-' + n).classList.remove('done', 'active');
       });
-      [1,2,3].forEach(n => {
+      [1, 2, 3].forEach(n => {
         document.getElementById('line-' + n).classList.remove('done');
       });
 
@@ -516,10 +665,10 @@
         ]);
 
         todosTreinadores = treinRes.data || [];
-        todosPlanos      = planosRes.data || [];
+        todosPlanos = planosRes.data || [];
 
         renderBotoesModalidade();
-      } catch(err) {
+      } catch (err) {
         console.error('Erro ao carregar treinadores:', err);
       }
     }
@@ -617,10 +766,10 @@
             <div class="treinador-card-desc">${t.descricaoProfissional || 'Treinador profissional cadastrado no SportPro.'}</div>
             <div class="treinador-card-modalidades" style="margin-top:0.5rem;">
               ${niveis.map(n => {
-                const cores = { INICIANTE: 'badge-green', INTERMEDIARIO: 'badge-yellow', AVANCADO: 'badge-red' };
-                const labels = { INICIANTE: '🟢 Iniciante', INTERMEDIARIO: '🟡 Intermediário', AVANCADO: '🔴 Avançado' };
-                return `<span class="badge ${cores[n] || 'badge-brand'}">${labels[n] || n}</span>`;
-              }).join('')}
+          const cores = { INICIANTE: 'badge-green', INTERMEDIARIO: 'badge-yellow', AVANCADO: 'badge-red' };
+          const labels = { INICIANTE: '🟢 Iniciante', INTERMEDIARIO: '🟡 Intermediário', AVANCADO: '🔴 Avançado' };
+          return `<span class="badge ${cores[n] || 'badge-brand'}">${labels[n] || n}</span>`;
+        }).join('')}
             </div>
           </div>`;
       }).join('');
@@ -705,15 +854,21 @@
         // Mostra o cronograma na aba atual
         mostrarCronograma(cronograma);
 
+        // Mostra banner e esconde o botão de gerar
+        document.getElementById('gerar-cronograma-wrap').classList.add('hidden');
+        document.getElementById('cronograma-gerado-banner').classList.remove('hidden');
+        document.getElementById('banner-data').textContent =
+          `Gerado em ${UI.formatDate(new Date().toISOString())} · IA personalizada para seu perfil`;
+
         // Recarrega todos os dados (stepper, stats, histórico, próximo passo)
         await carregarDadosIniciais();
 
         UI.showAlert('Cronograma gerado com sucesso!', 'success');
 
-        // Volta para visão geral para o atleta ver os passos atualizados
+
         setTimeout(() => {
-          showPanel('visao-geral');
-        }, 1500);
+          showPanel('cronograma', document.querySelector('[data-panel="cronograma"]'));
+        }, 500);
 
       } catch (err) {
         UI.showAlert(err.message, 'error');
@@ -724,9 +879,248 @@
 
     function mostrarCronograma(cronograma) {
       document.getElementById('cronograma-resultado').classList.remove('hidden');
-      document.getElementById('cronograma-treino').textContent = cronograma.treinoSemanal || '—';
-      document.getElementById('cronograma-dieta').textContent = cronograma.dieta || '—';
-      document.getElementById('cronograma-obs').textContent = cronograma.observacoes || '—';
+
+      // Treino — detecta dias e cria cards
+      document.getElementById('cronograma-treino').innerHTML =
+        formatarTreino(cronograma.treinoSemanal || '');
+
+      // Dieta — formata em parágrafos
+      document.getElementById('cronograma-dieta').innerHTML =
+        formatarTexto(cronograma.dieta || '');
+
+      // Observações
+      document.getElementById('cronograma-obs').innerHTML =
+        formatarTexto(cronograma.observacoes || '');
+    }
+
+    async function gerarNovoCronograma() {
+      const btn = document.getElementById('btn-gerar-novo');
+      UI.setLoading(btn, true);
+      try {
+        const res = await AtletaAPI.gerarCronograma(USER.id);
+        mostrarCronograma(res.data);
+        await carregarDadosIniciais();
+        UI.showAlert('Novo cronograma gerado!', 'success');
+        document.getElementById('banner-data').textContent =
+          `Atualizado em ${UI.formatDate(new Date().toISOString())} · IA personalizada para seu perfil`;
+      } catch (err) {
+        UI.showAlert(err.message, 'error');
+      } finally {
+        UI.setLoading(btn, false);
+      }
+    }
+
+    // ================================================================
+    // Cole estas duas funções no dashboard-atleta.html
+    // Substituindo as funções formatarTreino e formatarTexto existentes
+    // ================================================================
+
+    function formatarTreino(texto) {
+      if (!texto) return '<p class="text-muted">Nenhum treino gerado.</p>';
+
+      // Dias em português — todos os formatos possíveis
+      const padroesDia = [
+        { regex: /^(SEGUNDA|SEGUNDA[- ]FEIRA)/i, label: 'Segunda-feira', emoji: '💪' },
+        { regex: /^(TERCA|TERÇA|TERCA[- ]FEIRA|TERÇA[- ]FEIRA)/i, label: 'Terça-feira', emoji: '🏋️' },
+        { regex: /^(QUARTA|QUARTA[- ]FEIRA)/i, label: 'Quarta-feira', emoji: '🔄' },
+        { regex: /^(QUINTA|QUINTA[- ]FEIRA)/i, label: 'Quinta-feira', emoji: '⚡' },
+        { regex: /^(SEXTA|SEXTA[- ]FEIRA)/i, label: 'Sexta-feira', emoji: '🦵' },
+        { regex: /^(SABADO|SÁBADO)/i, label: 'Sábado', emoji: '🏃' },
+        { regex: /^(DOMINGO)/i, label: 'Domingo', emoji: '😴' },
+      ];
+
+      const linhas = texto.split('\n').filter(l => l.trim());
+      let html = '';
+      let diaAtual = null;
+      let emojiAtual = '📅';
+      let descAtual = [];
+
+      function flushDia() {
+        if (diaAtual) {
+          html += `
+        <div class="cronograma-dia">
+          <div class="cronograma-dia-titulo">${emojiAtual} ${diaAtual}</div>
+          <div class="cronograma-dia-desc">${descAtual.join('<br>')}</div>
+        </div>`;
+          descAtual = [];
+          diaAtual = null;
+        }
+      }
+
+      for (const linha of linhas) {
+        const trimmed = linha.trim();
+        if (!trimmed) continue;
+
+        // Detecta se a linha começa com um dia da semana
+        const diaMatch = padroesDia.find(p => p.regex.test(trimmed));
+
+        if (diaMatch) {
+          flushDia();
+          diaAtual = diaMatch.label;
+          emojiAtual = diaMatch.emoji;
+          // Pega o conteúdo após o nome do dia (após ":" ou "—" ou "-")
+          let resto = trimmed.replace(/^(segunda|terça|terca|quarta|quinta|sexta|sábado|sabado|domingo)([- ]feira)?[:\s—\-]*/i, '').trim();
+
+          // Se vier como JSON {"foco":"...","detalhes":"..."}, extrai o texto
+          if (resto.startsWith('{')) {
+            try {
+              const obj = JSON.parse(resto);
+              const partes = [];
+              if (obj.foco) partes.push(`<strong>${obj.foco}</strong>`);
+              if (obj.detalhes) partes.push(obj.detalhes);
+              if (obj.descricao) partes.push(obj.descricao);
+              if (obj.tipo) partes.push(`<em>${obj.tipo}</em>`);
+              resto = partes.join('<br>');
+            } catch (e) { }
+          }
+
+          if (resto) descAtual.push(resto);
+        } else if (diaAtual) {
+          let l = trimmed;
+          if (l.startsWith('{')) {
+            try {
+              const obj = JSON.parse(l);
+              const partes = [];
+              if (obj.foco) partes.push(`<strong>${obj.foco}</strong>`);
+              if (obj.detalhes) partes.push(obj.detalhes);
+              if (obj.descricao) partes.push(obj.descricao);
+              l = partes.join('<br>');
+            } catch (e) { }
+          }
+          descAtual.push(l);
+        } else {
+          // Linha fora de qualquer dia — card genérico
+          html += `<div class="cronograma-dia"><div class="cronograma-dia-desc">${trimmed}</div></div>`;
+        }
+      }
+      flushDia();
+
+      return html || `<div class="cronograma-texto">${texto.replace(/\n/g, '<br>')}</div>`;
+    }
+
+    function formatarTexto(texto) {
+      if (!texto) return '<p class="text-muted">Nenhuma informação.</p>';
+
+      // Mapa de chaves (sem acento, uppercase) → label + emoji
+      const secoes = {
+        'DISTRIBUICAOMACROS': { label: 'Distribuição de Macros', emoji: '📊' },
+        'MACROOBJETIVOS': { label: 'Objetivos de Macros', emoji: '📊' },
+        'MACROSRECOMENDADOS': { label: 'Macros Recomendados', emoji: '📊' },
+        'MACRONUTRIENTES': { label: 'Macronutrientes', emoji: '📊' },
+        'CARBOIDRATOS': { label: 'Carboidratos', emoji: '🌾' },
+        'PROTEINAS': { label: 'Proteínas', emoji: '🥩' },
+        'GORDURAS': { label: 'Gorduras', emoji: '🥑' },
+        'CAFEDAMANHA': { label: 'Café da Manhã', emoji: '☀️' },
+        'ALMOCO': { label: 'Almoço', emoji: '🍽️' },
+        'JANTAR': { label: 'Jantar', emoji: '🌙' },
+        'LANCHEPRETREINO': { label: 'Lanche Pré-treino', emoji: '⚡' },
+        'LANCHEPRETREINO': { label: 'Lanche Pré-treino', emoji: '⚡' },
+        'LANCHEPOSTRETREINO': { label: 'Lanche Pós-treino', emoji: '💪' },
+        'LANCHEPOSTREINO': { label: 'Lanche Pós-treino', emoji: '💪' },
+        'PRETREINO': { label: 'Pré-treino', emoji: '⚡' },
+        'POSTREINO': { label: 'Pós-treino', emoji: '💪' },
+        'HIDRATACAO': { label: 'Hidratação', emoji: '💧' },
+        'SUPLEMENTACAO': { label: 'Suplementação', emoji: '💊' },
+        'REFEICOES': { label: 'Refeições', emoji: '🍴' },
+        // Observações
+        'CUIDADO': { label: 'Cuidado', emoji: '⚠️' },
+        'ATENCAO': { label: 'Atenção', emoji: '⚠️' },
+        'PROGRESSAO': { label: 'Progressão', emoji: '📈' },
+        'RECUPERACAO': { label: 'Recuperação', emoji: '😴' },
+        'RECUPERACAOARTICULAR': { label: 'Recuperação Articular', emoji: '🦴' },
+        'DESCANSO': { label: 'Descanso', emoji: '😴' },
+        'SONO': { label: 'Sono e Nutrição', emoji: '😴' },
+        'AVALIACAO': { label: 'Avaliação', emoji: '🏥' },
+        'ADAPTACAO': { label: 'Adaptação', emoji: '🔄' },
+        'ORIENTACAO': { label: 'Orientação', emoji: '📋' },
+        'INTENSIDADE': { label: 'Intensidade', emoji: '🎯' },
+        'INTENSIDADECONTROLADA': { label: 'Intensidade Controlada', emoji: '🎯' },
+      };
+
+      // Expande objeto JSON em linhas legíveis
+      function expandirObj(obj, prefixo) {
+        return Object.entries(obj).map(([k, v]) => {
+          const label = k.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
+          return `${prefixo ? prefixo + ' — ' : ''}${label}: ${typeof v === 'object' ? JSON.stringify(v) : v}`;
+        }).join('\n');
+      }
+
+      // Tenta expandir string JSON
+      function expandirJSON(str) {
+        const s = str.trim();
+        if (s.startsWith('{') || s.startsWith('[')) {
+          try {
+            const obj = JSON.parse(s);
+            if (typeof obj === 'object' && !Array.isArray(obj)) {
+              return expandirObj(obj, '');
+            }
+          } catch (e) { }
+        }
+        return str;
+      }
+
+      // Normaliza chave removendo acentos e caracteres especiais
+      function normalizarChave(str) {
+        return str.normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^A-Za-z]/g, '')
+          .toUpperCase();
+      }
+
+      const linhas = texto.split('\n').filter(l => l.trim());
+      let html = '';
+
+      for (const linha of linhas) {
+        const trimmed = linha.trim();
+        if (!trimmed) continue;
+
+        const colonIdx = trimmed.indexOf(':');
+        if (colonIdx > 0) {
+          const chaveRaw = normalizarChave(trimmed.substring(0, colonIdx));
+          let conteudo = trimmed.substring(colonIdx + 1).trim();
+          const conteudoExpandido = expandirJSON(conteudo);
+
+          // Busca a chave no mapa
+          const match = Object.keys(secoes).find(k =>
+            chaveRaw === k ||
+            chaveRaw.startsWith(k) ||
+            k.startsWith(chaveRaw.substring(0, Math.min(10, chaveRaw.length)))
+          );
+
+          if (match) {
+            const { label, emoji } = secoes[match];
+
+            // Se o conteúdo expandiu em múltiplas linhas, cria sub-cards
+            if (conteudoExpandido !== conteudo) {
+              html += `<div class="cronograma-dia"><div class="cronograma-dia-titulo">${emoji} ${label}</div>`;
+              const sublinhas = conteudoExpandido.split('\n').filter(l => l.trim());
+              for (const sub of sublinhas) {
+                const ci = sub.indexOf(':');
+                if (ci > 0) {
+                  const sublabel = sub.substring(0, ci).trim();
+                  const subdesc = sub.substring(ci + 1).trim();
+                  html += `<div style="margin-top:0.5rem;"><strong style="color:var(--brand);font-size:0.82rem;">${sublabel}:</strong> <span style="color:var(--text-primary);font-size:0.88rem;">${subdesc}</span></div>`;
+                } else {
+                  html += `<div class="cronograma-dia-desc" style="margin-top:0.5rem;">${sub}</div>`;
+                }
+              }
+              html += `</div>`;
+            } else {
+              html += `
+            <div class="cronograma-dia">
+              <div class="cronograma-dia-titulo">${emoji} ${label}</div>
+              <div class="cronograma-dia-desc">${conteudo.replace(/\n/g, '<br>')}</div>
+            </div>`;
+            }
+            continue;
+          }
+        }
+
+        // Linha sem chave reconhecida — card simples
+        html += `<div class="cronograma-dia"><div class="cronograma-dia-desc">${trimmed}</div></div>`;
+      }
+
+      return html || `<div class="cronograma-texto">${texto.replace(/\n/g, '<br>')}</div>`;
     }
 
     function renderHistorico(cronos) {
@@ -736,23 +1130,52 @@
         return;
       }
       el.innerHTML = cronos.map((c, i) => `
-        <div class="card mb-2">
-          <div class="flex-between mb-2">
-            <div>
-              <span class="badge badge-green">${c.status}</span>
-              <span class="text-muted text-sm ml-1">${UI.formatDate(c.criadoEm)}</span>
-            </div>
-            <span class="text-muted text-sm">#${c.id}</span>
-          </div>
-          <div style="font-size:0.85rem;color:var(--text-muted);white-space:pre-wrap;max-height:120px;overflow:hidden;">
-            ${c.treinoSemanal.substring(0, 300)}...
-          </div>
-          <button onclick="expandirCronograma(${i})" class="btn btn-outline btn-sm mt-2">Ver completo</button>
-          <div id="historico-full-${i}" class="hidden mt-2">
-            <div class="cronograma-block">${c.treinoSemanal}</div>
-          </div>
+    <div class="card mb-2">
+      <div class="flex-between mb-2">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span class="badge badge-green">${c.status}</span>
+          <span class="text-muted text-sm">${UI.formatDate(c.criadoEm)}</span>
         </div>
-      `).join('');
+        <span class="text-muted text-sm">#${c.id}</span>
+      </div>
+
+      <!-- Preview resumido -->
+      <div id="historico-preview-${i}" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">
+        ${c.treinoSemanal.substring(0, 120).replace(/\{[^}]+\}/g, '').replace(/"/g, '')}...
+      </div>
+
+      <button onclick="toggleHistorico(${i})" class="btn btn-outline btn-sm">Ver completo</button>
+
+      <!-- Conteúdo completo formatado -->
+      <div id="historico-full-${i}" class="hidden mt-2">
+        <div style="margin-bottom:1rem;">
+          <div class="cronograma-secao-titulo">🏃 Treino Semanal</div>
+          <div>${formatarTreino(c.treinoSemanal)}</div>
+        </div>
+        ${c.dieta ? `
+        <div style="margin-bottom:1rem;">
+          <div class="cronograma-secao-titulo">🥗 Plano Alimentar</div>
+          <div>${formatarTexto(c.dieta)}</div>
+        </div>` : ''}
+        ${c.observacoes ? `
+        <div>
+          <div class="cronograma-secao-titulo">📝 Observações</div>
+          <div>${formatarTexto(c.observacoes)}</div>
+        </div>` : ''}
+      </div>
+    </div>
+  `).join('');
+    }
+
+    function toggleHistorico(i) {
+      const el = document.getElementById(`historico-full-${i}`);
+      const preview = document.getElementById(`historico-preview-${i}`);
+      const btn = el.previousElementSibling;
+      const aberto = !el.classList.contains('hidden');
+
+      el.classList.toggle('hidden');
+      preview.classList.toggle('hidden');
+      btn.textContent = aberto ? 'Ver completo' : 'Fechar';
     }
 
     function expandirCronograma(i) {
@@ -788,4 +1211,5 @@
     }
   </script>
 </body>
+
 </html>

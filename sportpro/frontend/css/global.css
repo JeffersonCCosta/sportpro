@@ -343,15 +343,60 @@ select.form-control {
 
 /* ---- Cronograma ---- */
 .cronograma-block {
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+.cronograma-dia {
   background: var(--surface-2);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
-  white-space: pre-wrap;
-  font-size: 0.9rem;
-  line-height: 1.8;
-  color: var(--text-primary);
   border: 1px solid var(--border);
-  font-family: 'Courier New', monospace;
+  border-left: 4px solid var(--brand);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  transition: var(--transition);
+}
+
+.cronograma-dia:hover {
+  border-color: var(--brand);
+  box-shadow: var(--shadow-glow);
+}
+
+.cronograma-dia-titulo {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--brand);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+
+.cronograma-dia-desc {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.7;
+}
+
+.cronograma-secao-titulo {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.cronograma-texto {
+  font-size: 0.92rem;
+  line-height: 1.9;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.cronograma-texto p {
+  margin-bottom: 0.75rem;
 }
 
 /* ---- Spinner ---- */
