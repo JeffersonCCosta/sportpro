@@ -6,10 +6,6 @@ target/
 .idea/
 *.iml
 
-# Segredos
-application.properties
-**/application.properties
-
 # SO
 .DS_Store
 Thumbs.db
