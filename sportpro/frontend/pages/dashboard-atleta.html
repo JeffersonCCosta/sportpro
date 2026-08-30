@@ -447,15 +447,20 @@
         ">
           <div style="display:flex;align-items:center;gap:1rem;">
             <div style="font-size:2rem;">✅</div>
-            <div>
-              <div style="font-family:var(--font-display);font-size:1.3rem;color:var(--brand);letter-spacing:0.05em;">
-                Cronograma Gerado
-              </div>
-              <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.2rem;" id="banner-data">
-                Gerado agora com IA personalizada para seu perfil
+              <div>
+                <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+                  <div style="font-family:var(--font-display);font-size:1.3rem;color:var(--brand);letter-spacing:0.05em;">
+                    Cronograma Gerado
+                  </div>
+                  <span style="background:rgba(200,255,0,0.12);color:var(--brand);font-size:0.72rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:999px;border:1px solid rgba(200,255,0,0.3);">
+                    🤖 Gerado por IA
+                  </span>
+                </div>
+                <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.2rem;" id="banner-data">
+                  Gerado agora com IA personalizada para seu perfil
+                </div>
               </div>
             </div>
-          </div>
           <button onclick="gerarNovoCronograma()" class="btn btn-primary btn-sm" id="btn-gerar-novo">
             ⚡ Gerar novo cronograma
           </button>
@@ -545,8 +550,9 @@
         // Carrega histórico
         renderHistorico(cronos);
 
-        // Se tiver cronograma, mostra o mais recente
+        // Se tiver cronograma, mostra o mais recente E exibe o banner (persiste após reload/login)
         if (cronos.length > 0) {
+          exibirBannerCronograma(cronos[0], atleta, 'Gerado');
           mostrarCronograma(cronos[0]);
         }
 
@@ -844,37 +850,42 @@
       }
     }
 
+    function exibirBannerCronograma(cronograma, atleta, prefixo = 'Gerado') {
+      document.getElementById('gerar-cronograma-wrap').classList.add('hidden');
+      document.getElementById('cronograma-gerado-banner').classList.remove('hidden');
+
+      const dataRef = cronograma.criadoEm ? UI.formatDate(cronograma.criadoEm) : UI.formatDate(new Date().toISOString());
+      const nomeTreinador = atleta && atleta.treinadorNome ? ` · Treinador: ${atleta.treinadorNome}` : '';
+
+      document.getElementById('banner-data').textContent =
+        `${prefixo} em ${dataRef} · IA personalizada para seu perfil${nomeTreinador}`;
+    }
+
     async function gerarCronograma() {
-  const btn = document.getElementById('btn-gerar');
-  UI.setLoading(btn, true);
-  try {
-    const res = await AtletaAPI.gerarCronograma(USER.id);
-    const cronograma = res.data;
+      const btn = document.getElementById('btn-gerar');
+      UI.setLoading(btn, true);
+      try {
+        const res = await AtletaAPI.gerarCronograma(USER.id);
+        const cronograma = res.data;
 
-    // Mostra banner e esconde o botão de gerar
-    document.getElementById('gerar-cronograma-wrap').classList.add('hidden');
-    document.getElementById('cronograma-gerado-banner').classList.remove('hidden');
-    document.getElementById('banner-data').textContent =
-      `Gerado em ${UI.formatDate(new Date().toISOString())} · IA personalizada para seu perfil`;
+        await carregarDadosIniciais();
 
-    // Recarrega todos os dados (stepper, stats, histórico, próximo passo)
-    await carregarDadosIniciais();
+        const atletaRes = await AtletaAPI.buscarPorId(USER.id);
+        exibirBannerCronograma(cronograma, atletaRes.data, 'Gerado');
+        mostrarCronograma(cronograma);
 
-    // Mostra o cronograma recém-gerado POR ÚLTIMO — garante que não seja sobrescrito
-    mostrarCronograma(cronograma);
+        UI.showAlert('Cronograma gerado com sucesso!', 'success');
 
-    UI.showAlert('Cronograma gerado com sucesso!', 'success');
+        setTimeout(() => {
+          showPanel('cronograma', document.querySelector('[data-panel="cronograma"]'));
+        }, 500);
 
-    setTimeout(() => {
-      showPanel('cronograma', document.querySelector('[data-panel="cronograma"]'));
-    }, 500);
-
-  } catch (err) {
-    UI.showAlert(err.message, 'error');
-  } finally {
-    UI.setLoading(btn, false);
-  }
-}
+      } catch (err) {
+        UI.showAlert(err.message, 'error');
+      } finally {
+        UI.setLoading(btn, false);
+      }
+    }
 
     function mostrarCronograma(cronograma) {
       document.getElementById('cronograma-resultado').classList.remove('hidden');
@@ -893,26 +904,25 @@
     }
 
     async function gerarNovoCronograma() {
-  const btn = document.getElementById('btn-gerar-novo');
-  UI.setLoading(btn, true);
-  try {
-    const res = await AtletaAPI.gerarCronograma(USER.id);
-    const cronograma = res.data;
+      const btn = document.getElementById('btn-gerar-novo');
+      UI.setLoading(btn, true);
+      try {
+        const res = await AtletaAPI.gerarCronograma(USER.id);
+        const cronograma = res.data;
 
-    await carregarDadosIniciais();
+        await carregarDadosIniciais();
 
-    // Mostra o cronograma recém-gerado POR ÚLTIMO
-    mostrarCronograma(cronograma);
+        const atletaRes = await AtletaAPI.buscarPorId(USER.id);
+        exibirBannerCronograma(cronograma, atletaRes.data, 'Atualizado');
+        mostrarCronograma(cronograma);
 
-    UI.showAlert('Novo cronograma gerado!', 'success');
-    document.getElementById('banner-data').textContent =
-      `Atualizado em ${UI.formatDate(new Date().toISOString())} · IA personalizada para seu perfil`;
-  } catch (err) {
-    UI.showAlert(err.message, 'error');
-  } finally {
-    UI.setLoading(btn, false);
-  }
-}
+        UI.showAlert('Novo cronograma gerado!', 'success');
+      } catch (err) {
+        UI.showAlert(err.message, 'error');
+      } finally {
+        UI.setLoading(btn, false);
+      }
+    }
 
     // ================================================================
     // Cole estas duas funções no dashboard-atleta.html
@@ -963,7 +973,7 @@
           diaAtual = diaMatch.label;
           emojiAtual = diaMatch.emoji;
           // Pega o conteúdo após o nome do dia (após ":" ou "—" ou "-")
-          let resto = trimmed.replace(/^(segunda|terça|terca|quarta|quinta|sexta|sábado|sabado|domingo)([- ]feira)?[:\s—\-]*/i, '').trim();
+          let resto = trimmed.replace(/^(segunda|terça|terca|quarta|quinta|sexta|sábado|sabado|domingo)([- ]?feira)?[:\s—\-]*/i, '').trim();
 
           // Se vier como JSON {"foco":"...","detalhes":"..."}, extrai o texto
           if (resto.startsWith('{')) {
@@ -971,23 +981,28 @@
               const obj = JSON.parse(resto);
               const partes = [];
               if (obj.foco) partes.push(`<strong>${obj.foco}</strong>`);
-              if (obj.detalhes) partes.push(obj.detalhes);
-              if (obj.descricao) partes.push(obj.descricao);
-              if (obj.tipo) partes.push(`<em>${obj.tipo}</em>`);
+              Object.entries(obj).forEach(([chave, valor]) => {
+                if (chave === 'foco' || !valor) return;
+                const label = chave.charAt(0).toUpperCase() + chave.slice(1);
+                partes.push(`<strong style="color:var(--brand);">${label}:</strong> ${valor}`);
+              });
               resto = partes.join('<br>');
             } catch (e) { }
           }
 
           if (resto) descAtual.push(resto);
         } else if (diaAtual) {
-          let l = trimmed;
+          let l = trimmed.replace(/^-?\s*FEIRA\s*:\s*/i, '').trim();
           if (l.startsWith('{')) {
             try {
               const obj = JSON.parse(l);
               const partes = [];
               if (obj.foco) partes.push(`<strong>${obj.foco}</strong>`);
-              if (obj.detalhes) partes.push(obj.detalhes);
-              if (obj.descricao) partes.push(obj.descricao);
+              Object.entries(obj).forEach(([chave, valor]) => {
+                if (chave === 'foco' || !valor) return;
+                const label = chave.charAt(0).toUpperCase() + chave.slice(1);
+                partes.push(`<strong style="color:var(--brand);">${label}:</strong> ${valor}`);
+              });
               l = partes.join('<br>');
             } catch (e) { }
           }
@@ -1091,8 +1106,13 @@
             k.startsWith(chaveRaw.substring(0, Math.min(10, chaveRaw.length)))
           );
 
-          if (match) {
-            const { label, emoji } = secoes[match];
+          // Regra extra: qualquer variação contendo "CALORIA" vira o mesmo card
+          const info = match
+            ? secoes[match]
+            : (chaveRaw.includes('CALORIA') ? { label: 'Calorias Diárias', emoji: '🔥' } : null);
+
+          if (info) {
+            const { label, emoji } = info;
 
             // Se o conteúdo expandiu em múltiplas linhas, cria sub-cards
             if (conteudoExpandido !== conteudo) {
@@ -1127,6 +1147,17 @@
       return html || `<div class="cronograma-texto">${texto.replace(/\n/g, '<br>')}</div>`;
     }
 
+    function limparPreviewTreino(texto) {
+      if (!texto) return '';
+      const limpo = texto
+        .replace(/[{}]/g, ' ')
+        .replace(/"/g, '')
+        .replace(/,/g, ' · ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return limpo.substring(0, 140) + (limpo.length > 140 ? '...' : '');
+    }
+
     function renderHistorico(cronos) {
       const el = document.getElementById('historico-list');
       if (!cronos.length) {
@@ -1145,7 +1176,7 @@
 
       <!-- Preview resumido -->
       <div id="historico-preview-${i}" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">
-        ${c.treinoSemanal.substring(0, 120).replace(/\{[^}]+\}/g, '').replace(/"/g, '')}...
+        ${limparPreviewTreino(c.treinoSemanal)}
       </div>
 
       <button onclick="toggleHistorico(${i})" class="btn btn-outline btn-sm">Ver completo</button>
