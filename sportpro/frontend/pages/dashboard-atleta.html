@@ -845,37 +845,36 @@
     }
 
     async function gerarCronograma() {
-      const btn = document.getElementById('btn-gerar');
-      UI.setLoading(btn, true);
-      try {
-        const res = await AtletaAPI.gerarCronograma(USER.id);
-        const cronograma = res.data;
+  const btn = document.getElementById('btn-gerar');
+  UI.setLoading(btn, true);
+  try {
+    const res = await AtletaAPI.gerarCronograma(USER.id);
+    const cronograma = res.data;
 
-        // Mostra o cronograma na aba atual
-        mostrarCronograma(cronograma);
+    // Mostra banner e esconde o botão de gerar
+    document.getElementById('gerar-cronograma-wrap').classList.add('hidden');
+    document.getElementById('cronograma-gerado-banner').classList.remove('hidden');
+    document.getElementById('banner-data').textContent =
+      `Gerado em ${UI.formatDate(new Date().toISOString())} · IA personalizada para seu perfil`;
 
-        // Mostra banner e esconde o botão de gerar
-        document.getElementById('gerar-cronograma-wrap').classList.add('hidden');
-        document.getElementById('cronograma-gerado-banner').classList.remove('hidden');
-        document.getElementById('banner-data').textContent =
-          `Gerado em ${UI.formatDate(new Date().toISOString())} · IA personalizada para seu perfil`;
+    // Recarrega todos os dados (stepper, stats, histórico, próximo passo)
+    await carregarDadosIniciais();
 
-        // Recarrega todos os dados (stepper, stats, histórico, próximo passo)
-        await carregarDadosIniciais();
+    // Mostra o cronograma recém-gerado POR ÚLTIMO — garante que não seja sobrescrito
+    mostrarCronograma(cronograma);
 
-        UI.showAlert('Cronograma gerado com sucesso!', 'success');
+    UI.showAlert('Cronograma gerado com sucesso!', 'success');
 
+    setTimeout(() => {
+      showPanel('cronograma', document.querySelector('[data-panel="cronograma"]'));
+    }, 500);
 
-        setTimeout(() => {
-          showPanel('cronograma', document.querySelector('[data-panel="cronograma"]'));
-        }, 500);
-
-      } catch (err) {
-        UI.showAlert(err.message, 'error');
-      } finally {
-        UI.setLoading(btn, false);
-      }
-    }
+  } catch (err) {
+    UI.showAlert(err.message, 'error');
+  } finally {
+    UI.setLoading(btn, false);
+  }
+}
 
     function mostrarCronograma(cronograma) {
       document.getElementById('cronograma-resultado').classList.remove('hidden');
@@ -894,21 +893,26 @@
     }
 
     async function gerarNovoCronograma() {
-      const btn = document.getElementById('btn-gerar-novo');
-      UI.setLoading(btn, true);
-      try {
-        const res = await AtletaAPI.gerarCronograma(USER.id);
-        mostrarCronograma(res.data);
-        await carregarDadosIniciais();
-        UI.showAlert('Novo cronograma gerado!', 'success');
-        document.getElementById('banner-data').textContent =
-          `Atualizado em ${UI.formatDate(new Date().toISOString())} · IA personalizada para seu perfil`;
-      } catch (err) {
-        UI.showAlert(err.message, 'error');
-      } finally {
-        UI.setLoading(btn, false);
-      }
-    }
+  const btn = document.getElementById('btn-gerar-novo');
+  UI.setLoading(btn, true);
+  try {
+    const res = await AtletaAPI.gerarCronograma(USER.id);
+    const cronograma = res.data;
+
+    await carregarDadosIniciais();
+
+    // Mostra o cronograma recém-gerado POR ÚLTIMO
+    mostrarCronograma(cronograma);
+
+    UI.showAlert('Novo cronograma gerado!', 'success');
+    document.getElementById('banner-data').textContent =
+      `Atualizado em ${UI.formatDate(new Date().toISOString())} · IA personalizada para seu perfil`;
+  } catch (err) {
+    UI.showAlert(err.message, 'error');
+  } finally {
+    UI.setLoading(btn, false);
+  }
+}
 
     // ================================================================
     // Cole estas duas funções no dashboard-atleta.html
