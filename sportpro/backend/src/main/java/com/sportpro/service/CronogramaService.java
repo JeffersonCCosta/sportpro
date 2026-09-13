@@ -107,6 +107,7 @@ public class CronogramaService {
 
         // Dados físicos
         payload.put("idade",              atleta.getIdade());
+        payload.put("sexo",               atleta.getSexo());
         payload.put("peso",               atleta.getPeso());
         payload.put("altura",             atleta.getAltura());
         payload.put("imc",                calcularImc(atleta.getPeso(), atleta.getAltura()));

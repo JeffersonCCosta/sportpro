@@ -37,6 +37,9 @@ public class Atleta {
     @Column(nullable = false)
     private Integer idade;
 
+    @Column(nullable = false)
+    private String sexo;
+
     /** Peso em kg */
     @Column(nullable = false)
     private Double peso;

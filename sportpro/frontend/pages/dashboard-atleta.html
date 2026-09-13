@@ -855,10 +855,10 @@
       document.getElementById('cronograma-gerado-banner').classList.remove('hidden');
 
       const dataRef = cronograma.criadoEm ? UI.formatDate(cronograma.criadoEm) : UI.formatDate(new Date().toISOString());
-      const nomeTreinador = atleta && atleta.treinadorNome ? ` · Treinador: ${atleta.treinadorNome}` : '';
+      const nomeTreinador = atleta && atleta.treinadorNome ? `<strong> • </strong>Treinador: ${atleta.treinadorNome}` : '';
 
-      document.getElementById('banner-data').textContent =
-        `${prefixo} em ${dataRef} · IA personalizada para seu perfil${nomeTreinador}`;
+      document.getElementById('banner-data').innerHTML =
+        `${prefixo} em ${dataRef}<strong> •</strong> IA personalizada para seu perfil${nomeTreinador}`;
     }
 
     async function gerarCronograma() {
@@ -887,8 +887,30 @@
       }
     }
 
+        function ehErroDeIA(texto) {
+      return texto && (texto.includes('⚠️ Erro na IA') || texto.includes('"status": "UNAVAILABLE"') || texto.includes('"code": 503'));
+    }
+
+    function mensagemErroIA() {
+      return `
+        <div class="cronograma-dia" style="border-color:rgba(255,180,0,0.4);">
+          <div class="cronograma-dia-titulo">⚠️ IA temporariamente indisponível</div>
+          <div class="cronograma-dia-desc">
+            O serviço de geração por IA está com alta demanda no momento. Isso costuma ser passageiro —
+            clique em "Gerar novo cronograma" novamente em alguns instantes.
+          </div>
+        </div>`;
+    }
+
     function mostrarCronograma(cronograma) {
       document.getElementById('cronograma-resultado').classList.remove('hidden');
+
+      if (ehErroDeIA(cronograma.treinoSemanal) || ehErroDeIA(cronograma.dieta) || ehErroDeIA(cronograma.observacoes)) {
+        document.getElementById('cronograma-treino').innerHTML = mensagemErroIA();
+        document.getElementById('cronograma-dieta').innerHTML = mensagemErroIA();
+        document.getElementById('cronograma-obs').innerHTML = mensagemErroIA();
+        return;
+      }
 
       // Treino — detecta dias e cria cards
       document.getElementById('cronograma-treino').innerHTML =
@@ -1059,18 +1081,36 @@
       // Expande objeto JSON em linhas legíveis
       function expandirObj(obj, prefixo) {
         return Object.entries(obj).map(([k, v]) => {
-          const label = k.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
+          const label = k
+            .replace(/([a-z])([A-Z])/g, '$1 $2')
+            .replace(/[_-]+/g, ' ')
+            .trim()
+            .toUpperCase();
           return `${prefixo ? prefixo + ' — ' : ''}${label}: ${typeof v === 'object' ? JSON.stringify(v) : v}`;
         }).join('\n');
       }
 
-      // Tenta expandir string JSON
+      // Tenta expandir string JSON (objetos ou arrays de objetos/strings)
       function expandirJSON(str) {
         const s = str.trim();
         if (s.startsWith('{') || s.startsWith('[')) {
           try {
             const obj = JSON.parse(s);
-            if (typeof obj === 'object' && !Array.isArray(obj)) {
+            if (Array.isArray(obj)) {
+              return obj.map(item => {
+                if (typeof item === 'object' && item !== null) {
+                  // Item de array como objeto: usa "nome" como título, se existir
+                  const { nome, ...resto } = item;
+                  const detalhes = Object.entries(resto)
+                    .filter(([k, v]) => v)
+                    .map(([k, v]) => v)
+                    .join(' — ');
+                  return nome ? `${nome}: ${detalhes}` : Object.values(item).join(' — ');
+                }
+                return String(item);
+              }).join('\n');
+            }
+            if (typeof obj === 'object' && obj !== null) {
               return expandirObj(obj, '');
             }
           } catch (e) { }
@@ -1107,9 +1147,27 @@
           );
 
           // Regra extra: qualquer variação contendo "CALORIA" vira o mesmo card
-          const info = match
+          // Se não achou no mapa mas o conteúdo é um JSON válido, cria um rótulo genérico
+          // a partir do próprio nome da chave, em vez de descartar
+          let info = match
             ? secoes[match]
-            : (chaveRaw.includes('CALORIA') ? { label: 'Calorias Diárias', emoji: '🔥' } : null);
+            : (chaveRaw.includes('CALORIA') ? { label: 'Calorias Diárias', emoji: '🔥' }
+            : (chaveRaw.includes('NUTRICION') ? { label: 'Metas Nutricionais', emoji: '📊' }
+            : (chaveRaw.includes('HIDRAT') ? { label: 'Hidratação', emoji: '💧' }
+            : (chaveRaw.includes('GESTAODECARGA') ? { label: 'Gestao de Carga', emoji: '📋' }
+            : (chaveRaw.includes('CONTROLEHIDRICO') ? { label: 'Controle hidrico', emoji: '📋' }
+            : (chaveRaw.includes('METAS') || chaveRaw.includes('METADIARIA') ? { label: 'Metas Diárias', emoji: '🎯' }
+            : (chaveRaw.includes('FEMININ') ? { label: 'Especificidades Femininas', emoji: '👩' }
+            : (chaveRaw.includes('MASCULIN') ? { label: 'Especificidades Masculinas', emoji: '👨' } : null))))))));
+
+          if (!info) {
+            const labelGenerico = trimmed.substring(0, colonIdx).trim()
+              .replace(/([a-z])([A-Z])/g, '$1 $2')
+              .replace(/[_-]+/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim();
+            info = { label: labelGenerico.charAt(0).toUpperCase() + labelGenerico.slice(1).toLowerCase(), emoji: '📋' };
+          }
 
           if (info) {
             const { label, emoji } = info;
@@ -1171,7 +1229,7 @@
           <span class="badge badge-green">${c.status}</span>
           <span class="text-muted text-sm">${UI.formatDate(c.criadoEm)}</span>
         </div>
-        <span class="text-muted text-sm">#${c.id}</span>
+          <span class="text-muted text-sm">Cronograma ${cronos.length - i} de ${cronos.length}</span>
       </div>
 
       <!-- Preview resumido -->

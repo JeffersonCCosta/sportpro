@@ -8,6 +8,7 @@ public class AtletaResponseDto {
     private String nome;
     private String email;
     private Integer idade;
+    private String sexo;
     private Double peso;
     private Double altura;
     private String objetivo;

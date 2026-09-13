@@ -38,6 +38,7 @@ public class AtletaService {
                 .email(request.getEmail())
                 .senha(passwordEncoder.encode(request.getSenha()))
                 .idade(request.getIdade())
+                .sexo(request.getSexo())
                 .peso(request.getPeso())
                 .altura(request.getAltura())
                 .build();
@@ -91,6 +92,7 @@ public class AtletaService {
                 .nome(a.getNome())
                 .email(a.getEmail())
                 .idade(a.getIdade())
+                .sexo(a.getSexo())
                 .peso(a.getPeso())
                 .altura(a.getAltura())
                 .objetivo(a.getObjetivo())

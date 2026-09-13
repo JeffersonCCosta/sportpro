@@ -26,6 +26,10 @@ public class AtletaRequest {
     @Max(value = 100, message = "Idade máxima: 100 anos")
     private Integer idade;
 
+    @NotBlank(message = "Sexo é obrigatória")
+    @Pattern(regexp = "MASCULINO|FEMININO", message = "Sexo deve ser MASCULINO ou FEMININO")
+    private String sexo;
+
     @NotNull(message = "Peso é obrigatório")
     @DecimalMin(value = "30.0", message = "Peso mínimo: 30 kg")
     private Double peso;
