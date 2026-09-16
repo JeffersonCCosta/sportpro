@@ -447,20 +447,21 @@
         ">
           <div style="display:flex;align-items:center;gap:1rem;">
             <div style="font-size:2rem;">✅</div>
-              <div>
-                <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
-                  <div style="font-family:var(--font-display);font-size:1.3rem;color:var(--brand);letter-spacing:0.05em;">
-                    Cronograma Gerado
-                  </div>
-                  <span style="background:rgba(200,255,0,0.12);color:var(--brand);font-size:0.72rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:999px;border:1px solid rgba(200,255,0,0.3);">
-                    🤖 Gerado por IA
-                  </span>
+            <div>
+              <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+                <div style="font-family:var(--font-display);font-size:1.3rem;color:var(--brand);letter-spacing:0.05em;">
+                  Cronograma Gerado
                 </div>
-                <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.2rem;" id="banner-data">
-                  Gerado agora com IA personalizada para seu perfil
-                </div>
+                <span
+                  style="background:rgba(200,255,0,0.12);color:var(--brand);font-size:0.72rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:999px;border:1px solid rgba(200,255,0,0.3);">
+                  🤖 Gerado por IA
+                </span>
+              </div>
+              <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.2rem;" id="banner-data">
+                Gerado agora com IA personalizada para seu perfil
               </div>
             </div>
+          </div>
           <button onclick="gerarNovoCronograma()" class="btn btn-primary btn-sm" id="btn-gerar-novo">
             ⚡ Gerar novo cronograma
           </button>
@@ -695,8 +696,7 @@
           <button
             onclick="selecionarModalidade('${mod}')"
             class="btn ${selecionada ? 'btn-primary' : (temTreinador ? 'btn-outline' : 'btn-outline')}"
-            style="${!temTreinador ? 'opacity:0.5;' : ''}"
-            title="${temTreinador ? planosDestaModalidade.length + ' treinador(es) disponível(is)' : 'Sem treinador disponível no momento'}"
+            title="${temTreinador ? planosDestaModalidade.length + ' treinador(es) disponível(is)' : 'Disponível apenas via cronograma gerado por IA'}"
           >
             ${mod}
             ${temTreinador ? `<span style="font-size:0.7rem;margin-left:0.3rem;color:var(--brand);">●</span>` : ''}
@@ -741,18 +741,26 @@
       renderBotoesModalidade();
     }
 
+    function cardIA(modalidade) {
+      const selecionado = treinadorSelecionado && treinadorSelecionado.isIA;
+      return `
+        <div class="treinador-card ${selecionado ? 'selected' : ''}"
+             onclick="selecionarTreinadorIA(this)"
+             style="border-style:dashed;">
+          <div class="treinador-card-avatar" style="background:rgba(200,255,0,0.15);">🤖</div>
+          <div class="treinador-card-name">Gerar com IA</div>
+          <div class="treinador-card-desc">Cronograma 100% personalizado por Inteligência Artificial, sem acompanhamento de um treinador específico.</div>
+          <div class="treinador-card-modalidades" style="margin-top:0.5rem;">
+            <span class="badge badge-brand">Disponível para ${modalidade}</span>
+          </div>
+        </div>`;
+    }
+
     function renderTreinadores(treinadores, modalidade) {
       const grid = document.getElementById('treinadores-grid');
 
       if (!treinadores.length) {
-        grid.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">🏋️</div>
-            <p>Nenhum treinador disponível para <strong>${modalidade}</strong> no momento.</p>
-            <p class="text-sm mt-1" style="color:var(--text-muted);">
-              Em breve será possível gerar o plano totalmente por IA quando não houver treinador disponível.
-            </p>
-          </div>`;
+        grid.innerHTML = cardIA(modalidade);
         return;
       }
 
@@ -778,7 +786,14 @@
         }).join('')}
             </div>
           </div>`;
-      }).join('');
+      }).join('') + cardIA(modalidade);
+    }
+
+    function selecionarTreinadorIA(el) {
+      document.querySelectorAll('.treinador-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      treinadorSelecionado = { id: null, nome: null, isIA: true };
+      document.getElementById('btn-confirmar-wrap').classList.remove('hidden');
     }
 
     function selecionarTreinador(id, nome, el) {
@@ -811,7 +826,12 @@
           experiencia: document.getElementById('experiencia').value || 'INICIANTE',
           diasDisponiveis: parseInt(document.getElementById('diasDisponiveis').value) || 3
         });
-        UI.showAlert(`Treinador ${treinadorSelecionado.nome} selecionado!`, 'success');
+        UI.showAlert(
+          treinadorSelecionado.isIA
+            ? 'Modo IA selecionado! Seu cronograma será gerado sem treinador específico.'
+            : `Treinador ${treinadorSelecionado.nome} selecionado!`,
+          'success'
+        );
         await carregarDadosIniciais();
         showPanel('perfil-esportivo');
       } catch (err) {
@@ -887,7 +907,7 @@
       }
     }
 
-        function ehErroDeIA(texto) {
+    function ehErroDeIA(texto) {
       return texto && (texto.includes('⚠️ Erro na IA') || texto.includes('"status": "UNAVAILABLE"') || texto.includes('"code": 503'));
     }
 
@@ -1152,13 +1172,13 @@
           let info = match
             ? secoes[match]
             : (chaveRaw.includes('CALORIA') ? { label: 'Calorias Diárias', emoji: '🔥' }
-            : (chaveRaw.includes('NUTRICION') ? { label: 'Metas Nutricionais', emoji: '📊' }
-            : (chaveRaw.includes('HIDRAT') ? { label: 'Hidratação', emoji: '💧' }
-            : (chaveRaw.includes('GESTAODECARGA') ? { label: 'Gestao de Carga', emoji: '📋' }
-            : (chaveRaw.includes('CONTROLEHIDRICO') ? { label: 'Controle hidrico', emoji: '📋' }
-            : (chaveRaw.includes('METAS') || chaveRaw.includes('METADIARIA') ? { label: 'Metas Diárias', emoji: '🎯' }
-            : (chaveRaw.includes('FEMININ') ? { label: 'Especificidades Femininas', emoji: '👩' }
-            : (chaveRaw.includes('MASCULIN') ? { label: 'Especificidades Masculinas', emoji: '👨' } : null))))))));
+              : (chaveRaw.includes('NUTRICION') ? { label: 'Metas Nutricionais', emoji: '📊' }
+                : (chaveRaw.includes('HIDRAT') ? { label: 'Hidratação', emoji: '💧' }
+                  : (chaveRaw.includes('GESTAODECARGA') ? { label: 'Gestao de Carga', emoji: '📋' }
+                    : (chaveRaw.includes('CONTROLEHIDRICO') ? { label: 'Controle hidrico', emoji: '📋' }
+                      : (chaveRaw.includes('METAS') || chaveRaw.includes('METADIARIA') ? { label: 'Metas Diárias', emoji: '🎯' }
+                        : (chaveRaw.includes('FEMININ') ? { label: 'Especificidades Femininas', emoji: '👩' }
+                          : (chaveRaw.includes('MASCULIN') ? { label: 'Especificidades Masculinas', emoji: '👨' } : null))))))));
 
           if (!info) {
             const labelGenerico = trimmed.substring(0, colonIdx).trim()

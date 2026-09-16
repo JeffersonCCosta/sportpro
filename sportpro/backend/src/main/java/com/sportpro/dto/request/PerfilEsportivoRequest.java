@@ -16,7 +16,7 @@ public class PerfilEsportivoRequest {
     @NotNull(message = "ID do atleta é obrigatório")
     private Long atletaId;
 
-    @NotNull(message = "ID do treinador é obrigatório")
+    /** Opcional — null significa cronograma 100% gerado por IA, sem treinador vinculado */
     private Long treinadorId;
 
     /** Nome da modalidade — valor fixo do dropdown: "100m rasos", "Maratona" etc. */

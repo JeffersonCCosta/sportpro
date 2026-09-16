@@ -54,11 +54,6 @@ public class CronogramaService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Atleta não encontrado: ID " + atletaId));
 
-        if (atleta.getTreinador() == null) {
-            throw new ResourceNotFoundException(
-                    "Atleta não possui treinador vinculado. Complete o perfil esportivo.");
-        }
-
         if (atleta.getExperiencia() == null || atleta.getModalidadeNome() == null) {
             throw new ResourceNotFoundException(
                     "Complete o perfil esportivo com modalidade e nível de experiência.");
@@ -122,9 +117,12 @@ public class CronogramaService {
         payload.put("limitacoesFisicas",  atleta.getLimitacoesFisicas());
         payload.put("observacoes",        atleta.getObservacoes());
 
-        // Treinador
-        payload.put("treinadorId",        atleta.getTreinador().getId());
-        payload.put("treinadorNome",      atleta.getTreinador().getNome());
+        // Treinador (opcional — ausência indica geração 100% por IA)
+        if (atleta.getTreinador() != null) {
+            payload.put("treinadorId",    atleta.getTreinador().getId());
+            payload.put("treinadorNome",  atleta.getTreinador().getNome());
+        }
+        payload.put("temTreinador",       atleta.getTreinador() != null);
 
         return payload;
     }

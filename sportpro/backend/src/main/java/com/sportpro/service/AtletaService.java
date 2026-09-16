@@ -55,15 +55,20 @@ public class AtletaService {
         Atleta atleta = atletaRepository.findById(request.getAtletaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Atleta não encontrado"));
 
-        Treinador treinador = treinadorRepository.findById(request.getTreinadorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Treinador não encontrado"));
+        if (request.getTreinadorId() != null) {
+            Treinador treinador = treinadorRepository.findById(request.getTreinadorId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Treinador não encontrado"));
+            atleta.setTreinador(treinador);
+        } else {
+            // Sem treinador vinculado: cronograma será gerado 100% por IA
+            atleta.setTreinador(null);
+        }
 
         atleta.setObjetivo(request.getObjetivo());
         atleta.setExperiencia(request.getExperiencia());
         atleta.setDiasDisponiveis(request.getDiasDisponiveis());
         atleta.setLimitacoesFisicas(request.getLimitacoesFisicas());
         atleta.setObservacoes(request.getObservacoes());
-        atleta.setTreinador(treinador);
         atleta.setModalidadeNome(request.getModalidadeNome());
 
         return toDto(atletaRepository.save(atleta));
