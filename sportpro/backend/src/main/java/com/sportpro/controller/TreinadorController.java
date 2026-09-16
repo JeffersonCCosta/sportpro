@@ -1,5 +1,6 @@
 package com.sportpro.controller;
 
+import com.sportpro.dto.request.AtualizarContaRequest;
 import com.sportpro.dto.request.TreinadorRequest;
 import com.sportpro.dto.response.ApiResponseDto;
 import com.sportpro.dto.response.TreinadorResponseDto;
@@ -50,6 +51,13 @@ public class TreinadorController {
     @GetMapping
     public ResponseEntity<ApiResponseDto<List<TreinadorResponseDto>>> listar() {
         return ResponseEntity.ok(ApiResponseDto.ok("Treinadores listados.", treinadorService.listarTodos()));
+    }
+
+    /** Edita nome e/ou senha da conta do treinador */
+    @PutMapping("/{id}/conta")
+    public ResponseEntity<ApiResponseDto<TreinadorResponseDto>> atualizarConta(
+            @PathVariable Long id, @Valid @RequestBody AtualizarContaRequest request) {
+        return ResponseEntity.ok(ApiResponseDto.ok("Conta atualizada com sucesso!", treinadorService.atualizarConta(id, request)));
     }
 
     /**

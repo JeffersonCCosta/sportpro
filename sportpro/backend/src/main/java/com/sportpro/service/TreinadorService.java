@@ -1,5 +1,6 @@
 package com.sportpro.service;
 
+import com.sportpro.dto.request.AtualizarContaRequest;
 import com.sportpro.dto.request.TreinadorRequest;
 import com.sportpro.dto.response.TreinadorResponseDto;
 import com.sportpro.entity.Treinador;
@@ -48,6 +49,24 @@ public class TreinadorService {
         log.info("Treinador cadastrado com ID: {}", salvo.getId());
 
         return toDto(salvo);
+    }
+
+    @Transactional
+    public TreinadorResponseDto atualizarConta(Long id, AtualizarContaRequest request) {
+        Treinador treinador = treinadorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Treinador não encontrado"));
+
+        treinador.setNome(request.getNome());
+
+        if (request.getNovaSenha() != null && !request.getNovaSenha().isBlank()) {
+            if (request.getSenhaAtual() == null ||
+                    !passwordEncoder.matches(request.getSenhaAtual(), treinador.getSenha())) {
+                throw new BusinessException("Senha atual incorreta");
+            }
+            treinador.setSenha(passwordEncoder.encode(request.getNovaSenha()));
+        }
+
+        return toDto(treinadorRepository.save(treinador));
     }
 
     @Transactional(readOnly = true)

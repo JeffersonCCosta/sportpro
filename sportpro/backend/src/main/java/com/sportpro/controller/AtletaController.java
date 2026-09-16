@@ -1,6 +1,7 @@
 package com.sportpro.controller;
 
 import com.sportpro.dto.request.AtletaRequest;
+import com.sportpro.dto.request.AtualizarContaRequest;
 import com.sportpro.dto.request.PerfilEsportivoRequest;
 import com.sportpro.dto.response.*;
 import com.sportpro.service.AtletaService;
@@ -55,6 +56,13 @@ public class AtletaController {
     public ResponseEntity<ApiResponseDto<AtletaResponseDto>> atualizarPerfil(
             @Valid @RequestBody PerfilEsportivoRequest request) {
         return ResponseEntity.ok(ApiResponseDto.ok("Perfil atualizado!", atletaService.atualizarPerfil(request)));
+    }
+
+    /** Edita nome e/ou senha da conta do atleta */
+    @PutMapping("/{id}/conta")
+    public ResponseEntity<ApiResponseDto<AtletaResponseDto>> atualizarConta(
+            @PathVariable Long id, @Valid @RequestBody AtualizarContaRequest request) {
+        return ResponseEntity.ok(ApiResponseDto.ok("Conta atualizada com sucesso!", atletaService.atualizarConta(id, request)));
     }
 
     /** RF008 — Dispara geração do cronograma via n8n */

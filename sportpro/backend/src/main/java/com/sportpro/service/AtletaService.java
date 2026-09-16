@@ -1,6 +1,7 @@
 package com.sportpro.service;
 
 import com.sportpro.dto.request.AtletaRequest;
+import com.sportpro.dto.request.AtualizarContaRequest;
 import com.sportpro.dto.request.PerfilEsportivoRequest;
 import com.sportpro.dto.response.AtletaResponseDto;
 import com.sportpro.entity.*;
@@ -70,6 +71,24 @@ public class AtletaService {
         atleta.setLimitacoesFisicas(request.getLimitacoesFisicas());
         atleta.setObservacoes(request.getObservacoes());
         atleta.setModalidadeNome(request.getModalidadeNome());
+
+        return toDto(atletaRepository.save(atleta));
+    }
+
+    @Transactional
+    public AtletaResponseDto atualizarConta(Long id, AtualizarContaRequest request) {
+        Atleta atleta = atletaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Atleta não encontrado"));
+
+        atleta.setNome(request.getNome());
+
+        if (request.getNovaSenha() != null && !request.getNovaSenha().isBlank()) {
+            if (request.getSenhaAtual() == null ||
+                    !passwordEncoder.matches(request.getSenhaAtual(), atleta.getSenha())) {
+                throw new BusinessException("Senha atual incorreta");
+            }
+            atleta.setSenha(passwordEncoder.encode(request.getNovaSenha()));
+        }
 
         return toDto(atletaRepository.save(atleta));
     }

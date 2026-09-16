@@ -84,10 +84,50 @@
   <nav class="navbar">
     <div class="navbar-brand">Sport<span>Pro</span></div>
     <div class="navbar-links">
-      <span id="nav-nome" style="color:var(--text-muted);font-size:0.9rem;"></span>
+      <span id="nav-nome" onclick="abrirModalConta()" style="color:var(--text-muted);font-size:0.9rem;cursor:pointer;"></span>
       <button onclick="logout()" class="btn btn-outline btn-sm">Sair</button>
     </div>
   </nav>
+
+  <div id="modal-conta-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem;">
+    <div class="card" style="max-width:420px;width:100%;">
+      <div class="flex-between mb-3">
+        <h3 style="margin:0;">Editar Conta</h3>
+        <button onclick="fecharModalConta()" class="btn btn-outline btn-sm" style="padding:0.25rem 0.6rem;">✕</button>
+      </div>
+
+      <div class="alert-container" id="modal-conta-alert"></div>
+
+      <form class="form-stack" onsubmit="handleAtualizarConta(event)">
+        <div class="form-group">
+          <label class="form-label">Nome</label>
+          <input type="text" id="conta-nome" class="form-control" required minlength="3">
+        </div>
+
+        <hr style="border-color:var(--border);margin:0.5rem 0;">
+        <p class="text-sm text-muted" style="margin:0;">Deixe os campos abaixo em branco para manter a senha atual.</p>
+
+        <div class="form-group">
+          <label class="form-label">Senha atual</label>
+          <input type="password" id="conta-senha-atual" class="form-control" placeholder="Necessária apenas para trocar a senha">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nova senha</label>
+          <input type="password" id="conta-nova-senha" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirmar nova senha</label>
+          <input type="password" id="conta-confirmar-senha" class="form-control" minlength="6">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="btn-salvar-conta">
+          Salvar alterações
+        </button>
+      </form>
+    </div>
+  </div>
 
   <div class="dashboard-layout">
     <aside class="sidebar">
@@ -608,6 +648,63 @@
       document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
       document.getElementById('tab-' + tab).classList.add('active');
       btn.classList.add('active');
+    }
+
+    function abrirModalConta() {
+      document.getElementById('conta-nome').value = USER.nome;
+      document.getElementById('conta-senha-atual').value = '';
+      document.getElementById('conta-nova-senha').value = '';
+      document.getElementById('conta-confirmar-senha').value = '';
+      document.getElementById('modal-conta-alert').innerHTML = '';
+      document.getElementById('modal-conta-overlay').classList.remove('hidden');
+    }
+
+    function fecharModalConta() {
+      document.getElementById('modal-conta-overlay').classList.add('hidden');
+    }
+
+    async function handleAtualizarConta(e) {
+      e.preventDefault();
+
+      const nome = document.getElementById('conta-nome').value.trim();
+      const senhaAtual = document.getElementById('conta-senha-atual').value;
+      const novaSenha = document.getElementById('conta-nova-senha').value;
+      const confirmarSenha = document.getElementById('conta-confirmar-senha').value;
+
+      if (novaSenha && novaSenha !== confirmarSenha) {
+        UI.showAlert('As senhas não coincidem.', 'error', document.getElementById('modal-conta-alert'));
+        return;
+      }
+
+      const btn = document.getElementById('btn-salvar-conta');
+      UI.setLoading(btn, true);
+      try {
+        const payload = { nome };
+        if (novaSenha) {
+          payload.senhaAtual = senhaAtual;
+          payload.novaSenha = novaSenha;
+        }
+
+        const result = await TreinadorAPI.atualizarConta(USER.id, payload);
+
+        USER.nome = result.data.nome;
+        Session.save({ data: { ...USER, tipo: 'TREINADOR' } });
+
+        document.getElementById('nav-nome').textContent = USER.nome;
+        const sidebarName = document.getElementById('sidebar-name');
+        if (sidebarName) sidebarName.textContent = USER.nome;
+        const sidebarAvatar = document.getElementById('sidebar-avatar');
+        if (sidebarAvatar) sidebarAvatar.textContent = UI.initials(USER.nome);
+        const greeting = document.getElementById('greeting');
+        if (greeting) greeting.textContent = `Olá, ${USER.nome.split(' ')[0]}!`;
+
+        UI.showAlert('Conta atualizada com sucesso!', 'success');
+        fecharModalConta();
+      } catch (err) {
+        UI.showAlert(err.message, 'error', document.getElementById('modal-conta-alert'));
+      } finally {
+        UI.setLoading(btn, false);
+      }
     }
 
     function logout() {

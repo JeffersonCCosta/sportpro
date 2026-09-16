@@ -74,7 +74,8 @@ const Auth = {
 const TreinadorAPI = {
   cadastrar: (data) => request('/treinadores', { method: 'POST', body: JSON.stringify(data) }),
   listar: () => request('/treinadores'),
-  buscarPorId: (id) => request(`/treinadores/${id}`)
+  buscarPorId: (id) => request(`/treinadores/${id}`),
+  atualizarConta: (id, data) => request(`/treinadores/${id}/conta`, { method: 'PUT', body: JSON.stringify(data) })
 };
 
 // ================================================================
@@ -85,6 +86,7 @@ const AtletaAPI = {
   listar: () => request('/atletas'),
   buscarPorId: (id) => request(`/atletas/${id}`),
   atualizarPerfil: (data) => request('/atletas/perfil', { method: 'PUT', body: JSON.stringify(data) }),
+  atualizarConta: (id, data) => request(`/atletas/${id}/conta`, { method: 'PUT', body: JSON.stringify(data) }),
   gerarCronograma: (id) => request(`/atletas/${id}/cronograma`, { method: 'POST' }),
   listarCronogramas: (id) => request(`/atletas/${id}/cronogramas`),
   listarPorTreinador: (treinadorId) => request(`/atletas/treinador/${treinadorId}`)
