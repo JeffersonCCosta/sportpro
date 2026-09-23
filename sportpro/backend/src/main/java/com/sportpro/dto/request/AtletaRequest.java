@@ -27,7 +27,7 @@ public class AtletaRequest {
     private Integer idade;
 
     @NotBlank(message = "Sexo é obrigatória")
-    @Pattern(regexp = "MASCULINO|FEMININO", message = "Sexo deve ser MASCULINO ou FEMININO")
+    @Pattern(regexp = "MASCULINO|FEMININO|NAO_INFORMAR", message = "Sexo deve ser MASCULINO, FEMININO ou NAO_INFORMAR")
     private String sexo;
 
     @NotNull(message = "Peso é obrigatório")

@@ -8,7 +8,8 @@
  *  Frontend → fetch() → API REST (Spring Boot) → MySQL / n8n
  */
 
-const API_BASE = 'http://localhost:8080/api';
+//const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'https://balanced-ideal-corporate-hon.trycloudflare.com/api';
 
 /**
  * Função base de requisição HTTP.
