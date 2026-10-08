@@ -8,8 +8,8 @@
  *  Frontend → fetch() → API REST (Spring Boot) → MySQL / n8n
  */
 
-//const API_BASE = 'http://localhost:8080/api';
-const API_BASE = 'https://balanced-ideal-corporate-hon.trycloudflare.com/api';
+const API_BASE = 'http://localhost:8080/api';
+//const API_BASE = 'https://arnold-renewal-assign-dennis.trycloudflare.com/api';
 
 /**
  * Função base de requisição HTTP.
@@ -204,10 +204,10 @@ const MODALIDADES = [
     '400m rasos',
     '800m',
     '1500m',
-    '5000m',
+    '5km',
     '10km',
-    'Meia-maratona',
-    'Maratona'
+    '21km',
+    '42km'
 ];
 
 const NIVEIS = [

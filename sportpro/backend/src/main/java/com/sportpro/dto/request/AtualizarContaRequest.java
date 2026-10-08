@@ -22,4 +22,7 @@ public class AtualizarContaRequest {
 
     @Size(min = 6, message = "Nova senha deve ter no mínimo 6 caracteres")
     private String novaSenha;
+
+    /** Peso atual do atleta (kg). Opcional — só Atleta usa, Treinador ignora. */
+    private Double peso;
 }
