@@ -81,7 +81,7 @@ public class AtletaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Atleta não encontrado"));
 
         atleta.setNome(request.getNome());
-        
+
         if (request.getPeso() != null) {
             atleta.setPeso(request.getPeso());
         }
